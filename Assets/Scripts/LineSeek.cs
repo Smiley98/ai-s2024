@@ -19,4 +19,47 @@ public class LineSeek : MonoBehaviour
         mouse.z = 0.0f;
         transform.position = Vector3.MoveTowards(transform.position, mouse, speed * Time.deltaTime);
     }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        GetComponent<SpriteRenderer>().color = Color.red;
+    }
+
+    void OnTriggerExit2D(Collider2D collision)
+    {
+        GetComponent<SpriteRenderer>().color = Color.green;
+    }
+
+    // Proximity-based collision handlers -- check "Is Trigger" in Collider Component's Inspector
+    //void OnTriggerEnter2D(Collider2D collision)
+    //{
+    //    Debug.Log($"Trigger between {name} and {collision.gameObject.name} started!");
+    //}
+    //
+    //void OnTriggerStay2D(Collider2D collision)
+    //{
+    //    Debug.Log($"Trigger between {name} and {collision.gameObject.name} persisting...");
+    //}
+    //
+    //void OnTriggerExit2D(Collider2D collision)
+    //{
+    //    Debug.Log($"Trigger between {name} and {collision.gameObject.name} ended!");
+    //}
+
+    // Physics-based collision -- uncheck "Is Trigger" in Collider Component's Inspector
+    //void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    Debug.Log($"Collision between {name} and {collision.gameObject.name} started!");
+    //}
+    //
+    //void OnCollisionStay2D(Collision2D collision)
+    //{
+    //    Debug.Log($"Collision between {name} and {collision.gameObject.name} persisting...");
+    //
+    //}
+    //
+    //void OnCollisionExit2D(Collision2D collision)
+    //{
+    //    Debug.Log($"Collision between {name} and {collision.gameObject.name} ended!");
+    //}
 }
