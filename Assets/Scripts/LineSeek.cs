@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LineSeek : MonoBehaviour
 {
+    public Button test;
+
     // Move at a speed of 5 units per second
     float speed = 5.0f;
 
@@ -14,6 +17,13 @@ public class LineSeek : MonoBehaviour
         //SceneManager.LoadScene("BeginScene");
         //SceneManager.LoadScene("EndScene");
         //SceneManager.LoadScene("PlayScene");
+
+        test.onClick.AddListener(OnTestClick);
+    }
+
+    void OnTestClick()
+    {
+        Debug.Log("Test");
     }
 
     // Move the object towards the mouse cursor
