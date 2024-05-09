@@ -9,18 +9,10 @@ public class LineSeek : MonoBehaviour
         
     }
 
-    // Make object position the position of the mouse cursor
     void Update()
     {
-        // 1. Mouse position in screen space
-        Vector3 mouse = Input.mousePosition;
-
-        // 2. Convert mouse position to screen space
-        mouse = Camera.main.ScreenToWorldPoint(mouse);
-        mouse = new Vector3(mouse.x, mouse.y, 0.0f);
-
-        // 3. Use world-space mouse to move our object!
+        Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouse.z = 0.0f;
         transform.position = mouse;
-        Debug.Log(mouse);
     }
 }
