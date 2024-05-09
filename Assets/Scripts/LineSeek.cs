@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LineSeek : MonoBehaviour
 {
@@ -9,7 +10,10 @@ public class LineSeek : MonoBehaviour
 
     void Start()
     {
-        
+        // TODO -- change scenes via button click
+        //SceneManager.LoadScene("BeginScene");
+        //SceneManager.LoadScene("EndScene");
+        //SceneManager.LoadScene("PlayScene");
     }
 
     // Move the object towards the mouse cursor
