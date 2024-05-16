@@ -25,5 +25,12 @@ public class Seek : MonoBehaviour
 
         // 3. Apply force vector
         rb.AddForce(seekForce);
+
+        // Long-form calculation of desired velocity:
+        Vector3 A = transform.position; // let A = seeker position
+        Vector3 B = mouse;              // let B = target position
+        Vector3 AB = B - A;             // let AB = vector FROM seeker TO target
+        Vector3 unitAB = AB.normalized; // Normalize AB so space isn't distorted
+        Vector3 vAB = unitAB * speed;   // Multiply unitAB by speed to move in direction at desired speed!
     }
 }
