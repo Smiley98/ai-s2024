@@ -13,11 +13,16 @@ public class LineSeek : MonoBehaviour
 
     void Start()
     {
-        // TODO -- change scenes via button click
+        // Lab 1 task:
+        // Add "Previous" and "Next" buttons to each scene so
+        // that scenes change accordingly when each button is pressed.
+
+        // Scene-changing code:
         //SceneManager.LoadScene("BeginScene");
         //SceneManager.LoadScene("EndScene");
         //SceneManager.LoadScene("PlayScene");
 
+        // Button-clicking code:
         test.onClick.AddListener(OnTestClick);
     }
 
