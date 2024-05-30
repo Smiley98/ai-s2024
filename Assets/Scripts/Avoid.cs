@@ -59,15 +59,12 @@ public class Avoid : MonoBehaviour
             rb.AddForce(SeekCurve(rb, avoidPosition, speed));
         }
 
-        // Bonus TODO:
-        // Play with this -- seems avoidance rotates accordingly, but cursor seek isn't rotating correctly
-        //float angle = Vector2.SignedAngle(Vector3.right, rb.velocity.normalized);
-        //Quaternion from = transform.rotation;
-        //Quaternion to = from * Quaternion.Euler(0.0f, 0.0f, angle);
-        //float maxAngle = 100.0f * dt;
-        //transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
-
-        // This also works reasonable well!
-        //transform.right = rb.velocity;
+        // Rotation fix -- needed to use current angle instead of 0 (Vector3.right)
+        // since we want to rotate from current (transform.right) to motion direction (rb.velocity.normalized)!
+        float angle = Vector2.SignedAngle(transform.right, rb.velocity.normalized);
+        Quaternion from = transform.rotation;
+        Quaternion to = from * Quaternion.Euler(0.0f, 0.0f, angle);
+        float maxAngle = 360.0f * dt;
+        transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
     }
 }
