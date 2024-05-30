@@ -23,6 +23,9 @@ public class Avoid : MonoBehaviour
 
     void Update()
     {
+        // Lab 3 (4% total) -- Add 2 probes (2% per probe)
+        // Ensure each probe detects the obstacle, and avoids it accordingly.
+        // (Handling rotation is not required. As long as the position changes, you're good)!
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = 0.0f;
         rb.AddForce(SeekCurve(rb, mouse, speed));
@@ -43,50 +46,28 @@ public class Avoid : MonoBehaviour
         RaycastHit2D hitLeft  = Physics2D.Raycast(transform.position, leftDirection,  distance);
         RaycastHit2D hitRight = Physics2D.Raycast(transform.position, rightDirection, distance);
 
+        // Seek right if obstacle detected to the left
         if (hitLeft)
         {
             Vector2 avoidPosition = transform.position - transform.up * 5.0f;
             rb.AddForce(SeekCurve(rb, avoidPosition, speed));
-
-            Quaternion from = transform.rotation;
-            Quaternion to = from * rightRotation;
-            float maxAngle = 10.0f * dt;
-            transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
         }
+        // Seek left if obstacle detected to the right
         else if (hitRight)
         {
             Vector2 avoidPosition = transform.position + transform.up * 5.0f;
             rb.AddForce(SeekCurve(rb, avoidPosition, speed));
-
-            Quaternion from = transform.rotation;
-            Quaternion to = from * leftRotation;
-            float maxAngle = 10.0f * dt;
-            transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
         }
 
-        //transform.rotation = Quaternion.RotateTowards(transform.rotation, transform.rotation * leftRotation, 10.0f * dt);
+        // Bonus TODO:
+        // Play with this -- seems avoidance rotates accordingly, but cursor seek isn't rotating correctly
+        //float angle = Vector2.SignedAngle(Vector3.right, rb.velocity.normalized);
+        //Quaternion from = transform.rotation;
+        //Quaternion to = from * Quaternion.Euler(0.0f, 0.0f, angle);
+        //float maxAngle = 100.0f * dt;
+        //transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
 
-        // Avoid abstacle if hit!
-        //RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, distance);
-        //if (hit.collider != null)
-        //{
-        //    Vector2 avoidPosition = transform.position + transform.up * 5.0f;
-        //    rb.AddForce(SeekCurve(rb, avoidPosition, speed));
-        //
-        //    Quaternion.RotateTowards(transform.rotation, leftRotation, 1.0f * dt);
-        //    transform.right = rb.velocity;
-        //}
-
-        // Same values, just one uses local axes and the other global
-        //Vector3 from = transform.rotation * Vector3.right;
-        //Vector3 to = transform.rotation * leftRotation * Vector3.right;
-        //Vector3 from = transform.right;
-        //Vector3 to = leftRotation * transform.right;
-        //Debug.Log(from);
-        //Debug.Log(to);
-
-        // Rotates towards a direction 30 degrees to the left of our player
-        // at rate of no more than 10 degrees per second
-        //transform.rotation = Quaternion.RotateTowards(transform.rotation, transform.rotation * leftRotation, 10.0f * dt);
+        // This also works reasonable well!
+        //transform.right = rb.velocity;
     }
 }
