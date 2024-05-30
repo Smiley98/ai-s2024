@@ -25,7 +25,7 @@ public class Avoid : MonoBehaviour
     {
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = 0.0f;
-        //rb.AddForce(SeekCurve(rb, mouse, speed));
+        rb.AddForce(SeekCurve(rb, mouse, speed));
 
         float dt = Time.deltaTime;
         float distance = 5.0f;
@@ -39,6 +39,32 @@ public class Avoid : MonoBehaviour
         //Debug.DrawLine(transform.position, transform.position + direction * distance, Color.magenta);
         Debug.DrawLine(transform.position, transform.position + leftDirection  * distance, Color.magenta);
         Debug.DrawLine(transform.position, transform.position + rightDirection * distance, Color.magenta);
+
+        RaycastHit2D hitLeft  = Physics2D.Raycast(transform.position, leftDirection,  distance);
+        RaycastHit2D hitRight = Physics2D.Raycast(transform.position, rightDirection, distance);
+
+        if (hitLeft)
+        {
+            Vector2 avoidPosition = transform.position - transform.up * 5.0f;
+            rb.AddForce(SeekCurve(rb, avoidPosition, speed));
+
+            Quaternion from = transform.rotation;
+            Quaternion to = from * rightRotation;
+            float maxAngle = 10.0f * dt;
+            transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
+        }
+        else if (hitRight)
+        {
+            Vector2 avoidPosition = transform.position + transform.up * 5.0f;
+            rb.AddForce(SeekCurve(rb, avoidPosition, speed));
+
+            Quaternion from = transform.rotation;
+            Quaternion to = from * leftRotation;
+            float maxAngle = 10.0f * dt;
+            transform.rotation = Quaternion.RotateTowards(from, to, maxAngle);
+        }
+
+        //transform.rotation = Quaternion.RotateTowards(transform.rotation, transform.rotation * leftRotation, 10.0f * dt);
 
         // Avoid abstacle if hit!
         //RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, distance);
@@ -61,6 +87,6 @@ public class Avoid : MonoBehaviour
 
         // Rotates towards a direction 30 degrees to the left of our player
         // at rate of no more than 10 degrees per second
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, transform.rotation * leftRotation, 10.0f * dt);
+        //transform.rotation = Quaternion.RotateTowards(transform.rotation, transform.rotation * leftRotation, 10.0f * dt);
     }
 }

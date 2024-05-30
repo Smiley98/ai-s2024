@@ -94,6 +94,8 @@ public class Seek : MonoBehaviour
         }
         else if (behaviour == Steering.SEEK_CURVE || behaviour == Steering.FLEE_CURVE)
         {
+            // TODO -- replace this code with the smooth rotation code in the Avoid script.
+            // (This code instantaneously changes directions which will make our rotation jitter).
             Vector3 direction = rb.velocity;
             transform.right = direction;
         }
