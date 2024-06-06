@@ -33,6 +33,11 @@ public class Steering : MonoBehaviour
 
     void Start()
     {
+        // *Very important to understand which direction is the origin (right vs up vs custom)* 
+        //Vector3 direction = Quaternion.Euler(0f, 0f, 135.0f) * Vector3.right;//Vector3.up;
+        //float angle = Vector2.SignedAngle(Vector3.right/*Vector3.up*/, direction);
+        //Debug.Log(angle);
+
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -63,8 +68,33 @@ public class Steering : MonoBehaviour
         float rotation = Mathf.MoveTowardsAngle(currentRotation, desiredRotation, deltaRotation);
         rb.MoveRotation(rotation);
 
+        // 4. Obstacle avoidance
+        Vector3 left = Quaternion.Euler(0.0f, 0.0f, 15.0f) * transform.right;
+        Vector3 right = Quaternion.Euler(0.0f, 0.0f, -15.0f) * transform.right;
+        if (Physics2D.Raycast(transform.position, left, rayLength))
+        {
+            rb.AddForce(Seek(rb, transform.position - transform.up * rayLength, moveSpeed));
+        }
+        if (Physics2D.Raycast(transform.position, right, rayLength))
+        {
+            rb.AddForce(Seek(rb, transform.position + transform.up * rayLength, moveSpeed));
+        }
+
         // Draw local axes
         Debug.DrawLine(transform.position, transform.position + transform.right * 10.0f, Color.red);
         Debug.DrawLine(transform.position, transform.position + transform.up * 10.0f, Color.green);
+
+        // Draw probes
+        Debug.DrawLine(transform.position, transform.position + left * rayLength, Color.blue);
+        Debug.DrawLine(transform.position, transform.position + right * rayLength, Color.magenta);
+
+        // Switch steering behaviours when space is pressed
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            int index = (int)behaviour;
+            index++;
+            index %= (int)SteeringBehaviour.COUNT;
+            behaviour = (SteeringBehaviour)index;
+        }
     }
 }
