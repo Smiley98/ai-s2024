@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Steering
+public enum Behaviour
 {
     SEEK_LINE,
     FLEE_LINE,
@@ -15,7 +15,7 @@ public class Seek : MonoBehaviour
 {
     float speed = 10.0f;
     Rigidbody2D rb;
-    Steering behaviour = Steering.SEEK_LINE;
+    Behaviour behaviour = Behaviour.SEEK_LINE;
 
     void Start()
     {
@@ -57,19 +57,19 @@ public class Seek : MonoBehaviour
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = 0.0f;
 
-        if (behaviour == Steering.SEEK_LINE)
+        if (behaviour == Behaviour.SEEK_LINE)
         {
             transform.position += SeekLine(transform.position, mouse, speed);
         }
-        else if (behaviour == Steering.FLEE_LINE)
+        else if (behaviour == Behaviour.FLEE_LINE)
         {
             transform.position += FleeLine(transform.position, mouse, speed);
         }
-        else if(behaviour == Steering.SEEK_CURVE)
+        else if(behaviour == Behaviour.SEEK_CURVE)
         {
             rb.AddForce(SeekCurve(rb, mouse, speed));
         }
-        else if(behaviour == Steering.FLEE_CURVE)
+        else if(behaviour == Behaviour.FLEE_CURVE)
         {
             // How to limit a steering behaviour:
             //Vector3 force = FleeCurve(rb, mouse, speed);
@@ -82,17 +82,17 @@ public class Seek : MonoBehaviour
         {
             int b = (int)behaviour;
             ++b;
-            b %= (int)Steering.COUNT;
-            behaviour = (Steering)b;
+            b %= (int)Behaviour.COUNT;
+            behaviour = (Behaviour)b;
         }
         
         // Behaviour-specific cases
-        if (behaviour == Steering.SEEK_LINE || behaviour == Steering.FLEE_LINE)
+        if (behaviour == Behaviour.SEEK_LINE || behaviour == Behaviour.FLEE_LINE)
         {
             rb.velocity = Vector3.zero;
             transform.right = Vector3.right;
         }
-        else if (behaviour == Steering.SEEK_CURVE || behaviour == Steering.FLEE_CURVE)
+        else if (behaviour == Behaviour.SEEK_CURVE || behaviour == Behaviour.FLEE_CURVE)
         {
             // TODO -- replace this code with the smooth rotation code in the Avoid script.
             // (This code instantaneously changes directions which will make our rotation jitter).
