@@ -32,23 +32,42 @@ public class Grid : MonoBehaviour
 
                 x += 1.0f;
             }
+
+            // Move to start of next row
             x = xStart;
             y -= 1.0f;
         }
-
-        
     }
 
     void Update()
     {
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                ColorTile(tiles[row][col], Color.white);
+            }
+        }
+
         ColorTile(tiles[0][0], Color.red);                  // top-left
         ColorTile(tiles[0][cols - 1], Color.green);         // top-right
         ColorTile(tiles[rows - 1][cols - 1], Color.blue);   // bot-right
-        ColorTile(tiles[rows - 1][0], Color.magenta);       // bot-left     
+        ColorTile(tiles[rows - 1][0], Color.magenta);       // bot-left
+
+        Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouse.z = 0.0f;
+
+        Cell mouseCell = WorldToGrid(mouse);
+        ColorTile(tiles[mouseCell.row][mouseCell.col], Color.cyan);
     }
     
     void ColorTile(GameObject tile, Color color)
     {
         tile.GetComponent<SpriteRenderer>().color = color;
+    }
+
+    Cell WorldToGrid(Vector3 world)
+    {
+        return new Cell { col = (int)world.x, row = (rows - 1) - (int)world.y };
     }
 }
