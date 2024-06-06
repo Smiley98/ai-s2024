@@ -59,6 +59,12 @@ public class Grid : MonoBehaviour
 
         Cell mouseCell = WorldToGrid(mouse);
         ColorTile(tiles[mouseCell.row][mouseCell.col], Color.cyan);
+
+        // If you implement adjacents correctly, you'll see a "plus" around your cursor!
+        foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
+        {
+            ColorTile(tiles[adj.row][adj.col], Color.cyan);
+        }
     }
     
     void ColorTile(GameObject tile, Color color)
