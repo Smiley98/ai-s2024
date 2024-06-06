@@ -66,8 +66,13 @@ public class Grid : MonoBehaviour
         tile.GetComponent<SpriteRenderer>().color = color;
     }
 
+    // Hint: Clamp will be helpful for Task 1!
     Cell WorldToGrid(Vector3 world)
     {
-        return new Cell { col = (int)world.x, row = (rows - 1) - (int)world.y };
+        int col = (int)world.x;
+        int row = (rows - 1) - (int)world.y;
+        col = Mathf.Clamp(col, 0, cols - 1);
+        row = Mathf.Clamp(row, 0, rows - 1);
+        return new Cell { col = col, row = row };
     }
 }
