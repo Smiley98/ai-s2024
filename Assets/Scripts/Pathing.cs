@@ -14,6 +14,15 @@ public static class Pathing
     {
         int rows = tiles.GetLength(0);
         int cols = tiles.GetLength(1);
+        bool[,] visited = new bool[rows, cols];
+        for (int row = 0;  row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                // Label walls as "visited" to prevent them from being explored!
+                visited[row, col] = tiles[row, col] == 1;
+            }
+        }
 
         Queue<Cell> frontier = new Queue<Cell>();
         frontier.Enqueue(start);
@@ -26,7 +35,9 @@ public static class Pathing
 
             foreach (Cell adj in Adjacents(cell, rows, cols))
             {
-                frontier.Enqueue(adj);
+                // Enqueue only if unvisited (otherwise infinite loop)!
+                if (!visited[adj.col, adj.row])
+                    frontier.Enqueue(adj);
             }
         }
 
@@ -53,14 +64,18 @@ public static class Pathing
         if (cell.col - 1 >= 0)
             cells.Add(new Cell { col = cell.col - 1, row = cell.row });
 
+        // right-case
+        if (cell.col + 1 < cols)
+            cells.Add(new Cell { col = cell.col + 1, row = cell.row });
+
+        // up-case
+        if (cell.row - 1 >= 0)
+            cells.Add(new Cell { col = cell.col, row = cell.row - 1 });
+
         // down-case
         if (cell.row + 1 < rows)
             cells.Add(new Cell { col = cell.col, row = cell.row + 1 });
-
-        // if the cell above the current cell is within bounds, add it to the list
-        // if the cell below the current cell is within bounds, add it to the list
-        // if the cell left of the current cell is within bounds, add it to the list
-        // if the cell right of the current cell is within bounds, add it to the list
+        
         return cells;
     }
 }
