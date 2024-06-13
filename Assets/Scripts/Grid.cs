@@ -9,7 +9,20 @@ public class Grid : MonoBehaviour
 
     int rows = 10;
     int cols = 20;
-    List<List<GameObject>> tiles = new List<List<GameObject>>();
+    List<List<GameObject>> tileObjects = new List<List<GameObject>>();
+    int[,] tiles =
+    {
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+    };
 
     void Start()
     {
@@ -21,14 +34,14 @@ public class Grid : MonoBehaviour
         for (int row = 0; row < rows; row++)
         {
             // Create a new list of tiles for each row
-            tiles.Add(new List<GameObject>());
+            tileObjects.Add(new List<GameObject>());
 
             // Add a tile to the list for each column of the row
             for (int col = 0; col < cols; col++)
             {
                 GameObject tile = Instantiate(tilePrefab);
                 tile.transform.position = new Vector3(x, y);
-                tiles[row].Add(tile);
+                tileObjects[row].Add(tile);
 
                 x += 1.0f;
             }
@@ -45,31 +58,45 @@ public class Grid : MonoBehaviour
         {
             for (int col = 0; col < cols; col++)
             {
-                ColorTile(tiles[row][col], Color.white);
+                //ColorTile(tileObjects[row][col], Color.white);
+                ColorTile(new Cell { col = col, row = row });
             }
         }
 
-        ColorTile(tiles[0][0], Color.red);                  // top-left
-        ColorTile(tiles[0][cols - 1], Color.green);         // top-right
-        ColorTile(tiles[rows - 1][cols - 1], Color.blue);   // bot-right
-        ColorTile(tiles[rows - 1][0], Color.magenta);       // bot-left
+        ColorTile(tileObjects[0][0], Color.red);                  // top-left
+        ColorTile(tileObjects[0][cols - 1], Color.green);         // top-right
+        ColorTile(tileObjects[rows - 1][cols - 1], Color.blue);   // bot-right
+        ColorTile(tileObjects[rows - 1][0], Color.magenta);       // bot-left
 
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = 0.0f;
 
         Cell mouseCell = WorldToGrid(mouse);
-        ColorTile(tiles[mouseCell.row][mouseCell.col], Color.cyan);
+        ColorTile(tileObjects[mouseCell.row][mouseCell.col], Color.cyan);
 
         // If you implement adjacents correctly, you'll see a "plus" around your cursor!
         foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
         {
-            ColorTile(tiles[adj.row][adj.col], Color.cyan);
+            ColorTile(tileObjects[adj.row][adj.col], Color.cyan);
         }
     }
     
     void ColorTile(GameObject tile, Color color)
     {
         tile.GetComponent<SpriteRenderer>().color = color;
+    }
+
+    void ColorTile(Cell cell)
+    {
+        int value = tiles[cell.row, cell.col];
+        Color[] colors =
+        {
+            Color.gray,     // 0 = Air
+            Color.black,    // 1 = Wall
+            Color.blue,     // 2 = Water
+            Color.green     // 3 = Grass
+        };
+        ColorTile(tileObjects[cell.row][cell.col], colors[value]);
     }
 
     // Hint: Clamp will be helpful for Task 1!
