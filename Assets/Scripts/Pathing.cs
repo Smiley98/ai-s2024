@@ -16,6 +16,15 @@ public static class Pathing
     public static List<Cell> Adjacents(Cell cell, int rows, int cols)
     {
         List<Cell> cells = new List<Cell>();
+
+        // left-case
+        if (cell.col - 1 >= 0)
+            cells.Add(new Cell { col = cell.col - 1, row = cell.row });
+
+        // down-case
+        if (cell.row + 1 < rows)
+            cells.Add(new Cell { col = cell.col, row = cell.row + 1 });
+
         // if the cell above the current cell is within bounds, add it to the list
         // if the cell below the current cell is within bounds, add it to the list
         // if the cell left of the current cell is within bounds, add it to the list

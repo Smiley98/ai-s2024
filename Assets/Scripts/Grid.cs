@@ -77,7 +77,7 @@ public class Grid : MonoBehaviour
         // If you implement adjacents correctly, you'll see a "plus" around your cursor!
         foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
         {
-            ColorTile(tileObjects[adj.row][adj.col], Color.cyan);
+            ColorTile(tileObjects[adj.row][adj.col], Color.magenta);
         }
     }
     
