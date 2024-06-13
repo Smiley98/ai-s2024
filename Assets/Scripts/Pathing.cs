@@ -10,6 +10,38 @@ public struct Cell
 
 public static class Pathing
 {
+    public static List<Cell> FloodFill(Cell start, Cell end, int[,] tiles, int count, Grid grid = null)
+    {
+        int rows = tiles.GetLength(0);
+        int cols = tiles.GetLength(1);
+
+        Queue<Cell> frontier = new Queue<Cell>();
+        frontier.Enqueue(start);
+        for (int i = 0; i < count; i++)
+        {
+            Cell cell = frontier.Dequeue();
+
+            if (grid != null)
+                grid.ColorTile(cell, Color.magenta);
+
+            foreach (Cell adj in Adjacents(cell, rows, cols))
+            {
+                frontier.Enqueue(adj);
+            }
+        }
+
+        // Using grid as a debug renderer via ColorTile
+        if (grid != null)
+        {
+            // Remember to make start & end the correct colours (1%) ;)
+            grid.ColorTile(start, Color.green);
+            grid.ColorTile(end, Color.red);
+        }
+
+        List<Cell> path = new List<Cell>();
+        return path;
+    }
+
     // Task 1: Follow the pseudocode to create an algorithm that makes a list of cells
     // which are adjacent (left, right, up, down) of the passed in cell.
     // *Ensure cells do not cause out-of-bounds errors (> 0, < rows & cols)*

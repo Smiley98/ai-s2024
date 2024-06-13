@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
+    // Drag the slider to watch flood-fill expand its search!
+    [SerializeField]
+    int count;
+
     [SerializeField]
     GameObject tilePrefab;
 
@@ -12,20 +16,47 @@ public class Grid : MonoBehaviour
     List<List<GameObject>> tileObjects = new List<List<GameObject>>();
     int[,] tiles =
     {
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+        //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, // 0
+        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 1
+        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 2
+        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 3
+        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 4
+        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 5
+        { 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 6
+        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 7
+        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 8
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }  // 9
     };
+
+    Cell start = new Cell { row = 4, col = 6 };
+    Cell end = new Cell { row = 7, col = 4 };
 
     void Start()
     {
+        // List is "last in first out (LIFO)".
+        // Queue is "first in first out (FIFO)".
+        List<int> nl = new List<int>();
+        Queue<int> nq = new Queue<int>();
+        nl.Add(1);
+        nl.Add(2);
+        nl.Add(3);
+
+        nq.Enqueue(1);
+        nq.Enqueue(2);
+        nq.Enqueue(3);
+
+        nl.RemoveAt(nl.Count - 1);
+        nq.Dequeue();
+
+        // Prints "1, 2" since 3 was last in (thus first out)
+        for (int i = 0; i <  nl.Count; i++)
+            Debug.Log(nl[i]);
+
+        // Prints "2, 3" since 1 was first in (thus first out)
+        while (nq.Count > 0)
+            Debug.Log(nq.Dequeue());
+
         float xStart = 0.5f;
         float yStart = rows - 0.5f;
         float x = xStart;
@@ -63,30 +94,28 @@ public class Grid : MonoBehaviour
             }
         }
 
-        ColorTile(tileObjects[0][0], Color.red);                  // top-left
-        ColorTile(tileObjects[0][cols - 1], Color.green);         // top-right
-        ColorTile(tileObjects[rows - 1][cols - 1], Color.blue);   // bot-right
-        ColorTile(tileObjects[rows - 1][0], Color.magenta);       // bot-left
-
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = 0.0f;
 
         Cell mouseCell = WorldToGrid(mouse);
-        ColorTile(tileObjects[mouseCell.row][mouseCell.col], Color.cyan);
+        ColorTile(mouseCell, Color.cyan);
 
-        // If you implement adjacents correctly, you'll see a "plus" around your cursor!
-        foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
-        {
-            ColorTile(tileObjects[adj.row][adj.col], Color.magenta);
-        }
+        // Task 1 test -- if done correctly you'll get a magenta "plus" around your cursor!
+        //foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
+        //{
+        //    ColorTile(adj, Color.magenta);
+        //}
+
+        Pathing.FloodFill(start, end, tiles, count, this);
     }
-    
-    void ColorTile(GameObject tile, Color color)
+
+    public void ColorTile(Cell cell, Color color)
     {
+        GameObject tile = tileObjects[cell.row][cell.col];
         tile.GetComponent<SpriteRenderer>().color = color;
     }
 
-    void ColorTile(Cell cell)
+    public void ColorTile(Cell cell)
     {
         int value = tiles[cell.row, cell.col];
         Color[] colors =
@@ -96,7 +125,7 @@ public class Grid : MonoBehaviour
             Color.blue,     // 2 = Water
             Color.green     // 3 = Grass
         };
-        ColorTile(tileObjects[cell.row][cell.col], colors[value]);
+        ColorTile(cell, colors[value]);
     }
 
     // Hint: Clamp will be helpful for Task 1!
@@ -107,5 +136,18 @@ public class Grid : MonoBehaviour
         col = Mathf.Clamp(col, 0, cols - 1);
         row = Mathf.Clamp(row, 0, rows - 1);
         return new Cell { col = col, row = row };
+    }
+
+    void GridTest()
+    {
+        Cell topLeft = new Cell { col = 0, row = 0 };
+        Cell topRight = new Cell { col = cols - 1, row = 0 };
+        Cell botLeft = new Cell { col = 0, row = rows - 1 };
+        Cell botRight = new Cell { col = cols - 1, row = rows - 1 };
+
+        ColorTile(topLeft, Color.red);      // top-left
+        ColorTile(topRight, Color.green);   // top-right
+        ColorTile(botLeft, Color.blue);     // bot-right
+        ColorTile(botRight, Color.magenta); // bot-left
     }
 }
