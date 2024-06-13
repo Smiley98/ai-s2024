@@ -1,11 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public struct Cell
 {
     public int col;
     public int row;
+
+    public static bool Equals(Cell a, Cell b)
+    {
+        return a.col == b.col && a.row == b.row;
+    }
+
+    public static Cell Invalid()
+    {
+        return new Cell { col = -1, row = -1 };
+    }
+}
+
+public struct Node
+{
+    public Cell curr;
+    public Cell prev;
 }
 
 public static class Pathing
@@ -15,21 +32,32 @@ public static class Pathing
         int rows = tiles.GetLength(0);
         int cols = tiles.GetLength(1);
         bool[,] visited = new bool[rows, cols];
+        Node[,] nodes = new Node[rows, cols];
         for (int row = 0;  row < rows; row++)
         {
             for (int col = 0; col < cols; col++)
             {
                 // Label walls as "visited" to prevent them from being explored!
                 visited[row, col] = tiles[row, col] == 1;
+                nodes[row, col].curr = new Cell { row = row, col = col };
+                nodes[row, col].prev = Cell.Invalid();
             }
         }
 
         Queue<Cell> frontier = new Queue<Cell>();
         frontier.Enqueue(start);
+
+        bool found = false;
         for (int i = 0; i < count; i++)
         {
             Cell cell = frontier.Dequeue();
             visited[cell.col, cell.row] = true;
+
+            if (Cell.Equals(cell, end))
+            {
+                found = true;
+                break;
+            }
 
             if (grid != null)
                 grid.ColorTile(cell, Color.magenta);
@@ -38,7 +66,11 @@ public static class Pathing
             {
                 // Enqueue only if unvisited (otherwise infinite loop)!
                 if (!visited[adj.col, adj.row])
+                {
                     frontier.Enqueue(adj);
+                    nodes[adj.row, adj.col].prev = cell;
+                    // Set parent ("prev") of adj to be cell (since cell was before adj)
+                }
             }
         }
 
@@ -50,7 +82,24 @@ public static class Pathing
             grid.ColorTile(end, Color.red);
         }
 
+        // Retrace our steps if we found a path!
+        return found ? Retrace(nodes, end) : new List<Cell>();
+    }
+
+    // Task 2: Follow the pseudocode to create an algorithm that makes a list of cells
+    // by looking up the parent of the current cell, then reversing to go from start to end.
+    public static List<Cell> Retrace(Node[,] nodes, Cell end)
+    {
         List<Cell> path = new List<Cell>();
+        // let curr = end
+        // let prev = parent of curr's node
+        // loop until prev is invalid
+        // (within loop):
+        //      Add curr to path
+        //      Set curr equal to prev
+        //      Set prev equal to parent of curr's node
+        // (after loop):
+        // Reverse path (since it currently goes from end to start)
         return path;
     }
 

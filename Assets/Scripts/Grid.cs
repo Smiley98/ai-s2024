@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Grid : MonoBehaviour
@@ -89,7 +90,6 @@ public class Grid : MonoBehaviour
         {
             for (int col = 0; col < cols; col++)
             {
-                //ColorTile(tileObjects[row][col], Color.white);
                 ColorTile(new Cell { col = col, row = row });
             }
         }
@@ -101,12 +101,16 @@ public class Grid : MonoBehaviour
         ColorTile(mouseCell, Color.cyan);
 
         // Task 1 test -- if done correctly you'll get a magenta "plus" around your cursor!
-        //foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
-        //{
-        //    ColorTile(adj, Color.magenta);
-        //}
+        foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
+        {
+            ColorTile(adj, Color.magenta);
+        }
 
-        Pathing.FloodFill(start, end, tiles, count, this);
+        // Task 2 test -- should render a cyan path from start to end!
+        foreach (Cell cell in Pathing.FloodFill(start, end, tiles, count, this))
+        {
+            ColorTile(cell, Color.cyan);
+        }
     }
 
     public void ColorTile(Cell cell, Color color)
