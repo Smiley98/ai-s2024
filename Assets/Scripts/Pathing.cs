@@ -29,6 +29,7 @@ public static class Pathing
         for (int i = 0; i < count; i++)
         {
             Cell cell = frontier.Dequeue();
+            visited[cell.col, cell.row] = true;
 
             if (grid != null)
                 grid.ColorTile(cell, Color.magenta);
