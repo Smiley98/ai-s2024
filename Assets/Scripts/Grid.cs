@@ -110,6 +110,9 @@ public class Grid : MonoBehaviour
         {
             ColorTile(cell, Color.cyan);
         }
+
+        ColorTile(start, Color.green);
+        ColorTile(end, Color.red);
     }
 
     public void ColorTile(Cell cell, Color color)

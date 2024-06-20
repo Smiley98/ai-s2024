@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public struct Cell
@@ -83,12 +82,12 @@ public static class Pathing
         }
 
         // Retrace our steps if we found a path!
-        return found ? Retrace(nodes, end) : new List<Cell>();
+        return found ? Retrace(nodes, start, end) : new List<Cell>();
     }
 
     // Task 2: Follow the pseudocode to create an algorithm that makes a list of cells
     // by looking up the parent of the current cell, then reversing to go from start to end.
-    public static List<Cell> Retrace(Node[,] nodes, Cell end)
+    public static List<Cell> Retrace(Node[,] nodes, Cell start, Cell end)
     {
         List<Cell> path = new List<Cell>();
 
@@ -110,6 +109,10 @@ public static class Pathing
             // Set prev equal to parent of curr's node
             prev = nodes[curr.row, curr.col].prev;
         }
+
+        // Add start manually since it's parent is invalid so the loop won't add it!
+        path.Add(start);
+
         // Reverse path (since it currently goes from end to start)
         return path;
     }
