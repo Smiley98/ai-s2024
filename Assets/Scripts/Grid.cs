@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 public class Grid : MonoBehaviour
 {
@@ -38,6 +39,10 @@ public class Grid : MonoBehaviour
         // Queue is "first in first out (FIFO)".
         List<int> nl = new List<int>();
         Queue<int> nq = new Queue<int>();
+
+        // Same is queue, but each value has a priority. Lower = higher priority.
+        PriorityQueue<int, float> pq = new PriorityQueue<int, float>();
+
         nl.Add(1);
         nl.Add(2);
         nl.Add(3);
@@ -45,6 +50,10 @@ public class Grid : MonoBehaviour
         nq.Enqueue(1);
         nq.Enqueue(2);
         nq.Enqueue(3);
+
+        pq.Enqueue(1, 1.1f);
+        pq.Enqueue(2, 0.3f);
+        pq.Enqueue(3, 0.6f);
 
         nl.RemoveAt(nl.Count - 1);
         nq.Dequeue();
@@ -56,6 +65,10 @@ public class Grid : MonoBehaviour
         // Prints "2, 3" since 1 was first in (thus first out)
         while (nq.Count > 0)
             Debug.Log(nq.Dequeue());
+
+        // Prints "2, 3, 1" since queue prioritizes lowest-to-highest
+        while (pq.Count > 0)
+            Debug.Log(pq.Dequeue());
 
         float xStart = 0.5f;
         float yStart = rows - 0.5f;

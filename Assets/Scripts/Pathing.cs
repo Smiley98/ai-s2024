@@ -85,6 +85,65 @@ public static class Pathing
         return found ? Retrace(nodes, start, end) : new List<Cell>();
     }
 
+    public static List<Cell> Dijkstra(Cell start, Cell end, int[,] tiles, int count, Grid grid = null)
+    {
+        int rows = tiles.GetLength(0);
+        int cols = tiles.GetLength(1);
+        bool[,] visited = new bool[rows, cols];
+        Node[,] nodes = new Node[rows, cols];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                // Label walls as "visited" to prevent them from being explored!
+                visited[row, col] = tiles[row, col] == 1;
+                nodes[row, col].curr = new Cell { row = row, col = col };
+                nodes[row, col].prev = Cell.Invalid();
+            }
+        }
+
+        Queue<Cell> frontier = new Queue<Cell>();
+        frontier.Enqueue(start);
+
+        bool found = false;
+        for (int i = 0; i < count; i++)
+        {
+            Cell cell = frontier.Dequeue();
+            visited[cell.col, cell.row] = true;
+
+            if (Cell.Equals(cell, end))
+            {
+                found = true;
+                break;
+            }
+
+            if (grid != null)
+                grid.ColorTile(cell, Color.magenta);
+
+            foreach (Cell adj in Adjacents(cell, rows, cols))
+            {
+                // Enqueue only if unvisited (otherwise infinite loop)!
+                if (!visited[adj.col, adj.row])
+                {
+                    frontier.Enqueue(adj);
+                    nodes[adj.row, adj.col].prev = cell;
+                    // Set parent ("prev") of adj to be cell (since cell was before adj)
+                }
+            }
+        }
+
+        // Using grid as a debug renderer via ColorTile
+        if (grid != null)
+        {
+            // Remember to make start & end the correct colours (1%) ;)
+            grid.ColorTile(start, Color.green);
+            grid.ColorTile(end, Color.red);
+        }
+
+        // Retrace our steps if we found a path!
+        return found ? Retrace(nodes, start, end) : new List<Cell>();
+    }
+
     // Task 2: Follow the pseudocode to create an algorithm that makes a list of cells
     // by looking up the parent of the current cell, then reversing to go from start to end.
     public static List<Cell> Retrace(Node[,] nodes, Cell start, Cell end)
