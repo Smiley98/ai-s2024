@@ -21,8 +21,8 @@ public struct Cell
 
 public struct Node
 {
-    public Cell curr;
-    public Cell prev;
+    public Cell curr;   // Current
+    public Cell prev;   // Parent ("what came before?")
 }
 
 public static class Pathing
@@ -91,14 +91,25 @@ public static class Pathing
     public static List<Cell> Retrace(Node[,] nodes, Cell end)
     {
         List<Cell> path = new List<Cell>();
+
         // let curr = end
+        Cell curr = end;
+
         // let prev = parent of curr's node
+        Cell prev = nodes[curr.row, curr.col].prev;
+
         // loop until prev is invalid
-        // (within loop):
-        //      Add curr to path
-        //      Set curr equal to prev
-        //      Set prev equal to parent of curr's node
-        // (after loop):
+        while(!Cell.Equals(prev, Cell.Invalid()))
+        {
+            // Add curr to path
+            path.Add(curr);
+
+            // Set curr equal to prev
+            curr = prev;
+
+            // Set prev equal to parent of curr's node
+            prev = nodes[curr.row, curr.col].prev;
+        }
         // Reverse path (since it currently goes from end to start)
         return path;
     }
