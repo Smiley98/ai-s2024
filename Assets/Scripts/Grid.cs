@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
+public enum PathType
+{
+    FLOODFILL,
+    DIJKSTRA
+}
+
 public class Grid : MonoBehaviour
 {
     // Drag the slider to watch flood-fill expand its search!
@@ -11,6 +17,9 @@ public class Grid : MonoBehaviour
 
     [SerializeField]
     GameObject tilePrefab;
+
+    [SerializeField]
+    PathType pathType;
 
     int rows = 10;
     int cols = 20;
@@ -118,11 +127,16 @@ public class Grid : MonoBehaviour
             ColorTile(adj, Color.magenta);
         }
 
-        // Task 2 test -- should render a cyan path from start to end!
-        foreach (Cell cell in Pathing.FloodFill(start, end, tiles, count, this))
-        {
+        // Choose between flood-fill (bad) vs Dijkstra's (good)
+        // 300 vs 75 iterations -- Dijkstra's priority-queue is a significant improvement!
+        List<Cell> path = new List<Cell>();
+        if (pathType == PathType.FLOODFILL)
+            path = Pathing.FloodFill(start, end, tiles, count, this);
+        else if (pathType == PathType.DIJKSTRA)
+            path = Pathing.Dijkstra(start, end, tiles, count, this);
+
+        foreach (Cell cell in path)
             ColorTile(cell, Color.cyan);
-        }
 
         ColorTile(start, Color.green);
         ColorTile(end, Color.red);
