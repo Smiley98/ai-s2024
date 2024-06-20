@@ -24,23 +24,24 @@ public class Grid : MonoBehaviour
     int rows = 10;
     int cols = 20;
     List<List<GameObject>> tileObjects = new List<List<GameObject>>();
+
     int[,] tiles =
     {
         //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
         { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, // 0
-        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 1
-        { 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 2
-        { 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 3
-        { 1, 2, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 4
-        { 1, 2, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 5
-        { 1, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 6
-        { 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 7
-        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 8
+        { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 1
+        { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 2
+        { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 3
+        { 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 4
+        { 1, 0, 0, 1, 0, 0, 0, 0, 1, 2, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1 }, // 5
+        { 1, 0, 0, 1, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 1 }, // 6
+        { 1, 0, 0, 1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 1 }, // 7
+        { 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, // 8
         { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }  // 9
     };
 
-    Cell start = new Cell { row = 4, col = 6 };
-    Cell end = new Cell { row = 7, col = 4 };
+    Cell start = new Cell { col = 6, row = 5 };
+    Cell end = new Cell { col = 10, row = 4 };
 
     void Start()
     {
@@ -121,11 +122,8 @@ public class Grid : MonoBehaviour
         Cell mouseCell = WorldToGrid(mouse);
         ColorTile(mouseCell, Color.cyan);
 
-        // Task 1 test -- if done correctly you'll get a magenta "plus" around your cursor!
         foreach (Cell adj in Pathing.Adjacents(mouseCell, rows, cols))
-        {
             ColorTile(adj, Color.magenta);
-        }
 
         // Choose between flood-fill (bad) vs Dijkstra's (good)
         // 300 vs 75 iterations -- Dijkstra's priority-queue is a significant improvement!
@@ -135,9 +133,14 @@ public class Grid : MonoBehaviour
         else if (pathType == PathType.DIJKSTRA)
             path = Pathing.Dijkstra(start, end, tiles, count, this);
 
+        // TODO -- make an object follow the path
+        // Do so by storing a current position and a next position, then moving between the two.
+        // Be sure to update current & next based on proximity, and prevent out of range errors!
+
         foreach (Cell cell in path)
             ColorTile(cell, Color.cyan);
 
+        // TODO -- right-click to set the start tile, left click to set the end tile.
         ColorTile(start, Color.green);
         ColorTile(end, Color.red);
     }
@@ -169,6 +172,12 @@ public class Grid : MonoBehaviour
         col = Mathf.Clamp(col, 0, cols - 1);
         row = Mathf.Clamp(row, 0, rows - 1);
         return new Cell { col = col, row = row };
+    }
+
+    // TODO -- given a cell (array coordinates), what's its world-space position (Unity coordinates) 
+    Vector3 WorldToGrid(Cell cell)
+    {
+        return Vector3.zero;
     }
 
     void GridTest()
