@@ -24,7 +24,7 @@ public class DecisionTreeTheory : MonoBehaviour
         Debug.Log("Gotta go fast!!! *Distorted Sonic noises intensify*");
     }
 
-    void Start()
+    void Traverse()
     {
         if (isVisible)
         {
@@ -51,5 +51,15 @@ public class DecisionTreeTheory : MonoBehaviour
                 Creep();
             }
         }
+    }
+
+    void Start()
+    {
+        
+    }
+
+    void Update()
+    {
+        Traverse();
     }
 }
