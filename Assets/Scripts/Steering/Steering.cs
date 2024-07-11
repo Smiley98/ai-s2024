@@ -31,6 +31,9 @@ public class Steering : MonoBehaviour
     float turnSpeed = 1080.0f;
     float rayLength = 2.5f;
 
+    public Vector3 target;
+    public bool debugDraw;
+
     void Start()
     {
         // *Very important to understand which direction is the origin (right vs up vs custom)* 
@@ -43,20 +46,20 @@ public class Steering : MonoBehaviour
 
     void Update()
     {
-        // 1. Acquire target
-        Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouse.z = 0.0f;
+        // 1. Acquire target (replaced with public field)
+        //Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //mouse.z = 0.0f;
 
         // 2. Linear seek
         Vector3 steeringForce = Vector3.zero;
         switch (behaviour)
         {
             case SteeringBehaviour.SEEK:
-                steeringForce = Seek(rb, mouse, moveSpeed);
+                steeringForce = Seek(rb, target, moveSpeed);
                 break;
 
             case SteeringBehaviour.FLEE:
-                steeringForce = Flee(rb, mouse, moveSpeed);
+                steeringForce = Flee(rb, target, moveSpeed);
                 break;
         }
         rb.AddForce(steeringForce);
@@ -80,13 +83,16 @@ public class Steering : MonoBehaviour
             rb.AddForce(Seek(rb, transform.position + transform.up * rayLength, moveSpeed));
         }
 
-        // Draw local axes
-        Debug.DrawLine(transform.position, transform.position + transform.right * 10.0f, Color.red);
-        Debug.DrawLine(transform.position, transform.position + transform.up * 10.0f, Color.green);
+        if (debugDraw)
+        {
+            // Draw local axes
+            Debug.DrawLine(transform.position, transform.position + transform.right * 10.0f, Color.red);
+            Debug.DrawLine(transform.position, transform.position + transform.up * 10.0f, Color.green);
 
-        // Draw probes
-        Debug.DrawLine(transform.position, transform.position + left * rayLength, Color.blue);
-        Debug.DrawLine(transform.position, transform.position + right * rayLength, Color.magenta);
+            // Draw probes
+            Debug.DrawLine(transform.position, transform.position + left * rayLength, Color.blue);
+            Debug.DrawLine(transform.position, transform.position + right * rayLength, Color.magenta);
+        }
 
         // Switch steering behaviours when space is pressed
         if (Input.GetKeyDown(KeyCode.Space))
