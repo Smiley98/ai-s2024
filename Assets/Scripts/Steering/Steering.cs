@@ -62,6 +62,7 @@ public class Steering : MonoBehaviour
     float moveSpeed = 10.0f;
     float turnSpeed = 1080.0f;
     float rayLength = 2.5f;
+    float rayAngle = 15.0f;
 
     void Start()
     {
@@ -70,31 +71,31 @@ public class Steering : MonoBehaviour
 
     void Update()
     {
-        // 1. Acquire target (world-space mouse cursor)
+        // Acquire target (world-space mouse cursor)
         Vector3 target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         target.z = 0.0f;
 
-        // 2. Linear seek
+        // Seek or flee target
         Vector3 steeringForce = Vector3.zero;
         switch (behaviour)
         {
             case SteeringBehaviour.SEEK:
                 steeringForce += Seek(rb, target, moveSpeed);
                 break;
-
+        
             case SteeringBehaviour.FLEE:
                 steeringForce += Flee(rb, target, moveSpeed);
                 break;
         }
 
-        // 3. Rotate towards the direction of motion (avoidance depends on orientation)
-        rb.MoveRotation(RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime));
-
-        // 4. Obstacle avoidance
-        steeringForce += Avoid(rb, moveSpeed, rayLength);
-
-        // 5. Apply net steering force (seek/flee + avoid)
+        // Summate & apply steering forces
+        steeringForce += Seek(rb, target, moveSpeed);
+        steeringForce += Avoid(rb, moveSpeed, rayLength, rayAngle, true);
         rb.AddForce(steeringForce);
+
+        // Rotate towards the direction of motion (needed for avoidance probe orientation)
+        float rotation = RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
+        rb.MoveRotation(rotation);
 
         // Switch steering behaviours when space is pressed
         if (Input.GetKeyDown(KeyCode.Space))

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 101881787}
   - component: {fileID: 101881786}
   - component: {fileID: 101881788}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -266,7 +266,6 @@ GameObject:
   - component: {fileID: 150640832}
   - component: {fileID: 150640837}
   - component: {fileID: 150640836}
-  - component: {fileID: 150640835}
   m_Layer: 2
   m_Name: Enemy
   m_TagString: Untagged
@@ -290,7 +289,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 206828fc40ca1314eb4d3b50a791d53d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -300,7 +299,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 0
   m_CollisionDetection: 1
-  m_Constraints: 4
+  m_Constraints: 0
 --- !u!212 &150640833
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -368,20 +367,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &150640835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 150640830}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40f692f3f198edb42bbac4b9efd55097, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {x: 0, y: 0, z: 0}
-  debugDraw: 0
 --- !u!114 &150640836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -632,7 +617,7 @@ Rigidbody2D:
   m_LinearDrag: 5
   m_AngularDrag: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 206828fc40ca1314eb4d3b50a791d53d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -835,7 +820,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &719797310
 Transform:
   m_ObjectHideFlags: 0
@@ -874,7 +859,7 @@ GameObject:
   - component: {fileID: 763596423}
   - component: {fileID: 763596422}
   - component: {fileID: 763596424}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1070,7 +1055,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1160569119
 Transform:
   m_ObjectHideFlags: 0
@@ -1224,7 +1209,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1276914189
 Transform:
   m_ObjectHideFlags: 0
@@ -1267,7 +1252,7 @@ GameObject:
   - component: {fileID: 1426885940}
   - component: {fileID: 1426885939}
   - component: {fileID: 1426885941}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1460,7 +1445,7 @@ GameObject:
   - component: {fileID: 1803876243}
   - component: {fileID: 1803876242}
   m_Layer: 0
-  m_Name: Obstacle (1)
+  m_Name: Avoidance Test
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,7 +1548,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 6, y: 0, z: 1}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 1}
+  m_LocalScale: {x: 1.75, y: 1.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1579,7 +1564,7 @@ GameObject:
   - component: {fileID: 1843152122}
   - component: {fileID: 1843152121}
   - component: {fileID: 1843152123}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}

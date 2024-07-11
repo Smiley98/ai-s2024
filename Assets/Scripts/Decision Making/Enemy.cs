@@ -19,11 +19,12 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        rb.MoveRotation(Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime));
+        float rotation = Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
+        rb.MoveRotation(rotation);
 
         Vector3 steeringForce = Vector2.zero;
         steeringForce += Steering.Seek(rb, waypoints[waypoint].transform.position, moveSpeed);
-        steeringForce += Steering.Avoid(rb, moveSpeed, 2.5f, 15.0f, true);
+        steeringForce += Steering.Avoid(rb, moveSpeed, 2.5f);
         rb.AddForce(steeringForce);
     }
 
