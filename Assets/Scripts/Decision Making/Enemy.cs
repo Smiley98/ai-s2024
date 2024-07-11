@@ -9,32 +9,22 @@ public class Enemy : MonoBehaviour
     public Transform[] waypoints;
     int waypoint = 0;
 
-    Steering steering;
-    const float seekSpeed = 10.0f;
+    const float moveSpeed = 10.0f;
+    const float turnSpeed = 1080.0f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        steering = GetComponent<Steering>();
     }
 
     void Update()
     {
-        // Don't actually use the steering script since it seeks/flees/avoids.
-        // We want to seek/flee/avoid, but based on our own enemy-specific logic!
-        //Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //mouse.z = 0.0f;
-        //steering.target = mouse;
+        rb.MoveRotation(Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime));
 
-        // TODO -- add avoidance force (summate forces)
-        rb.AddForce(Patrol());
-    }
-
-    Vector2 Patrol()
-    {
-        Vector2 target = waypoints[waypoint].transform.position;
-        Vector2 seekForce = Steering.Seek(rb, target, seekSpeed);
-        return seekForce;
+        Vector3 steeringForce = Vector2.zero;
+        steeringForce += Steering.Seek(rb, waypoints[waypoint].transform.position, moveSpeed);
+        steeringForce += Steering.Avoid(rb, moveSpeed, 2.5f, 15.0f, true);
+        rb.AddForce(steeringForce);
     }
 
     void OnTriggerEnter2D(Collider2D collision)

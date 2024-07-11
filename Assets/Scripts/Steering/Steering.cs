@@ -25,74 +25,76 @@ public class Steering : MonoBehaviour
         return desired - current;
     }
 
+    public static Vector3 Avoid(Rigidbody2D seeker, float speed, float rayLength, float rayAngle = 15.0f, bool drawRays = false)
+    {
+        Transform transform = seeker.transform;
+        Vector3 left = Quaternion.Euler(0.0f, 0.0f,   rayAngle) * transform.right;
+        Vector3 right = Quaternion.Euler(0.0f, 0.0f, -rayAngle) * transform.right;
+        if (Physics2D.Raycast(transform.position, left, rayLength))
+        {
+            return Seek(seeker, transform.position - transform.up * rayLength, speed);
+        }
+        if (Physics2D.Raycast(transform.position, right, rayLength))
+        {
+            return Seek(seeker, transform.position + transform.up * rayLength, speed);
+        }
+
+        if (drawRays)
+        {
+            Debug.DrawLine(transform.position, transform.position + left * rayLength, Color.cyan);
+            Debug.DrawLine(transform.position, transform.position + right * rayLength, Color.cyan);
+        }
+        
+        return Vector3.zero;
+    }
+
+    public static float RotateTowardsVelocity(Rigidbody2D seeker, float turnSpeed, float deltaTime)
+    {
+        float currentRotation = seeker.rotation;
+        float desiredRotation = Vector2.SignedAngle(Vector3.right, seeker.velocity.normalized);
+        float deltaRotation = turnSpeed * deltaTime;
+        float rotation = Mathf.MoveTowardsAngle(currentRotation, desiredRotation, deltaRotation);
+        return rotation;
+    }
+
     SteeringBehaviour behaviour = SteeringBehaviour.SEEK;
     Rigidbody2D rb;
     float moveSpeed = 10.0f;
     float turnSpeed = 1080.0f;
     float rayLength = 2.5f;
 
-    public Vector3 target;
-    public bool debugDraw;
-
     void Start()
     {
-        // *Very important to understand which direction is the origin (right vs up vs custom)* 
-        //Vector3 direction = Quaternion.Euler(0f, 0f, 135.0f) * Vector3.right;//Vector3.up;
-        //float angle = Vector2.SignedAngle(Vector3.right/*Vector3.up*/, direction);
-        //Debug.Log(angle);
-
         rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
-        // 1. Acquire target (replaced with public field)
-        //Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //mouse.z = 0.0f;
+        // 1. Acquire target (world-space mouse cursor)
+        Vector3 target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        target.z = 0.0f;
 
         // 2. Linear seek
         Vector3 steeringForce = Vector3.zero;
         switch (behaviour)
         {
             case SteeringBehaviour.SEEK:
-                steeringForce = Seek(rb, target, moveSpeed);
+                steeringForce += Seek(rb, target, moveSpeed);
                 break;
 
             case SteeringBehaviour.FLEE:
-                steeringForce = Flee(rb, target, moveSpeed);
+                steeringForce += Flee(rb, target, moveSpeed);
                 break;
         }
-        rb.AddForce(steeringForce);
 
-        // 3. Angular seek
-        float currentRotation = rb.rotation;
-        float desiredRotation = Vector2.SignedAngle(Vector3.right, rb.velocity.normalized);
-        float deltaRotation = turnSpeed * Time.deltaTime;
-        float rotation = Mathf.MoveTowardsAngle(currentRotation, desiredRotation, deltaRotation);
-        rb.MoveRotation(rotation);
+        // 3. Rotate towards the direction of motion (avoidance depends on orientation)
+        rb.MoveRotation(RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime));
 
         // 4. Obstacle avoidance
-        Vector3 left = Quaternion.Euler(0.0f, 0.0f, 15.0f) * transform.right;
-        Vector3 right = Quaternion.Euler(0.0f, 0.0f, -15.0f) * transform.right;
-        if (Physics2D.Raycast(transform.position, left, rayLength))
-        {
-            rb.AddForce(Seek(rb, transform.position - transform.up * rayLength, moveSpeed));
-        }
-        if (Physics2D.Raycast(transform.position, right, rayLength))
-        {
-            rb.AddForce(Seek(rb, transform.position + transform.up * rayLength, moveSpeed));
-        }
+        steeringForce += Avoid(rb, moveSpeed, rayLength);
 
-        if (debugDraw)
-        {
-            // Draw local axes
-            Debug.DrawLine(transform.position, transform.position + transform.right * 10.0f, Color.red);
-            Debug.DrawLine(transform.position, transform.position + transform.up * 10.0f, Color.green);
-
-            // Draw probes
-            Debug.DrawLine(transform.position, transform.position + left * rayLength, Color.blue);
-            Debug.DrawLine(transform.position, transform.position + right * rayLength, Color.magenta);
-        }
+        // 5. Apply net steering force (seek/flee + avoid)
+        rb.AddForce(steeringForce);
 
         // Switch steering behaviours when space is pressed
         if (Input.GetKeyDown(KeyCode.Space))
