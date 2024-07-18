@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField]
+    Transform player;
+
     Rigidbody2D rb;
 
     public Transform[] waypoints;
@@ -17,6 +20,15 @@ public class Enemy : MonoBehaviour
     GameObject bulletPrefab;
     Timer shootCooldown = new Timer();
 
+    enum State
+    {
+        NEUTRAL,
+        OFFENSIVE,
+        DEFENSIVE
+    };
+
+    State state = State.NEUTRAL;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -25,37 +37,55 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        float dt = Time.deltaTime;
         float rotation = Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
         rb.MoveRotation(rotation);
-        // TODO -- separate logic into states, for now just do stuff unconditionally for ease of testing!
 
-        // Unconditionally seek waypoints & avoid obstacles
-        Vector3 steeringForce = Vector2.zero;
-        steeringForce += Steering.Seek(rb, waypoints[waypoint].transform.position, moveSpeed);
-        // Does more harm than good cause it gets stuck in corners, and detects the player.
-        // Could solve with proximity-based weighting, but we're trying to keep this simple!
-        //steeringForce += Steering.Avoid(rb, moveSpeed, 2.5f, 15.0f, true);
-        rb.AddForce(steeringForce);
-
-        // Unconditionally shoot at the player if visible (LOS)
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, viewDistance);
-        if (hit && hit.collider.CompareTag("Player"))
+        bool playerHit = hit && hit.collider.CompareTag("Player");
+        state = playerHit ? State.OFFENSIVE : State.NEUTRAL;
+        // TODO: Add transition state-based actions (ie acquire nearest waypoint).
+
+        // Repeating state-based actions:
+        switch (state)
         {
-            // Shoot at player
-            shootCooldown.Tick(dt);
-            if (shootCooldown.Expired())
-            {
-                shootCooldown.Reset();
-                GameObject bullet = Instantiate(bulletPrefab);
-                bullet.transform.position = transform.position + transform.right;
-                bullet.GetComponent<Rigidbody2D>().velocity = transform.right * 10.0f;
-                Destroy(bullet, 1.0f);
-            }
+            case State.NEUTRAL:
+                Patrol();
+                break;
+
+            case State.OFFENSIVE:
+                Attack();
+                break;
         }
 
-        Color color = hit ? Color.red : Color.green;
+        Color color = playerHit ? Color.red : Color.green;
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
+    }
+
+    void Attack()
+    {
+        // Seek player
+        Vector3 steeringForce = Vector2.zero;
+        steeringForce += Steering.Seek(rb, player.position, moveSpeed);
+        rb.AddForce(steeringForce);
+
+        // Shoot player
+        shootCooldown.Tick(Time.deltaTime);
+        if (shootCooldown.Expired())
+        {
+            shootCooldown.Reset();
+            GameObject bullet = Instantiate(bulletPrefab);
+            bullet.transform.position = transform.position + transform.right;
+            bullet.GetComponent<Rigidbody2D>().velocity = transform.right * 10.0f;
+            Destroy(bullet, 1.0f);
+        }
+    }
+
+    void Patrol()
+    {
+        // Seek waypoint
+        Vector3 steeringForce = Vector2.zero;
+        steeringForce += Steering.Seek(rb, waypoints[waypoint].transform.position, moveSpeed);
+        rb.AddForce(steeringForce);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -63,6 +93,8 @@ public class Enemy : MonoBehaviour
         if (collision.CompareTag("Bullet"))
             return;
 
+        // Extra practice: ensure the player will always patrol the nearest waypoint.
+        // Keep track of this when switching into the NEUTRAL state (instead of whenever the player collides)!
         waypoint++;
         waypoint %= waypoints.Length;
     }
