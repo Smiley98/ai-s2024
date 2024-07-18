@@ -9,17 +9,23 @@ public class Enemy : MonoBehaviour
     public Transform[] waypoints;
     int waypoint = 0;
 
-    const float moveSpeed = 10.0f;
+    const float moveSpeed = 5.0f;
     const float turnSpeed = 1080.0f;
     const float viewDistance = 7.5f;
+
+    [SerializeField]
+    GameObject bulletPrefab;
+    Timer shootCooldown = new Timer();
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        shootCooldown.total = 0.25f;
     }
 
     void Update()
     {
+        float dt = Time.deltaTime;
         float rotation = Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
         rb.MoveRotation(rotation);
         // TODO -- separate logic into states, for now just do stuff unconditionally for ease of testing!
@@ -34,9 +40,18 @@ public class Enemy : MonoBehaviour
 
         // Unconditionally shoot at the player if visible (LOS)
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, viewDistance);
-        if (hit)
+        if (hit && hit.collider.CompareTag("Player"))
         {
             // Shoot at player
+            shootCooldown.Tick(dt);
+            if (shootCooldown.Expired())
+            {
+                shootCooldown.Reset();
+                GameObject bullet = Instantiate(bulletPrefab);
+                bullet.transform.position = transform.position + transform.right;
+                bullet.GetComponent<Rigidbody2D>().velocity = transform.right * 10.0f;
+                Destroy(bullet, 1.0f);
+            }
         }
 
         Color color = hit ? Color.red : Color.green;
@@ -45,6 +60,9 @@ public class Enemy : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.CompareTag("Bullet"))
+            return;
+
         waypoint++;
         waypoint %= waypoints.Length;
     }
