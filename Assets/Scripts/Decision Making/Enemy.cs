@@ -12,9 +12,9 @@ public class Enemy : MonoBehaviour
     public Transform[] waypoints;
     int waypoint = 0;
 
-    const float moveSpeed = 5.0f;
+    const float moveSpeed = 7.5f;
     const float turnSpeed = 1080.0f;
-    const float viewDistance = 7.5f;
+    const float viewDistance = 5.0f;
 
     [SerializeField]
     GameObject bulletPrefab;
@@ -27,6 +27,8 @@ public class Enemy : MonoBehaviour
         DEFENSIVE
     };
 
+    // TODO: Add health to player & enemy.
+    // If enemy drops below 25% health, flee and shoot!
     State state = State.NEUTRAL;
 
     void Start()
@@ -40,9 +42,8 @@ public class Enemy : MonoBehaviour
         float rotation = Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
         rb.MoveRotation(rotation);
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, viewDistance);
-        bool playerHit = hit && hit.collider.CompareTag("Player");
-        state = playerHit ? State.OFFENSIVE : State.NEUTRAL;
+        float playerDistance = Vector2.Distance(transform.position, player.position);
+        state = playerDistance <= viewDistance ? State.OFFENSIVE : State.NEUTRAL;
         // TODO: Add transition state-based actions (ie acquire nearest waypoint).
 
         // Repeating state-based actions:
@@ -57,7 +58,7 @@ public class Enemy : MonoBehaviour
                 break;
         }
 
-        Color color = playerHit ? Color.red : Color.green;
+        Color color = state == State.NEUTRAL ? Color.green : Color.red;
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
     }
 
@@ -68,14 +69,19 @@ public class Enemy : MonoBehaviour
         steeringForce += Steering.Seek(rb, player.position, moveSpeed);
         rb.AddForce(steeringForce);
 
-        // Shoot player
+        // LOS to player
+        Vector3 playerDirection = (player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, playerDirection, viewDistance);
+        bool playerHit = hit && hit.collider.CompareTag("Player");
+
+        // Shoot player if in LOS
         shootCooldown.Tick(Time.deltaTime);
-        if (shootCooldown.Expired())
+        if (playerHit && shootCooldown.Expired())
         {
             shootCooldown.Reset();
             GameObject bullet = Instantiate(bulletPrefab);
-            bullet.transform.position = transform.position + transform.right;
-            bullet.GetComponent<Rigidbody2D>().velocity = transform.right * 10.0f;
+            bullet.transform.position = transform.position + playerDirection;
+            bullet.GetComponent<Rigidbody2D>().velocity = playerDirection * 10.0f;
             Destroy(bullet, 1.0f);
         }
     }
