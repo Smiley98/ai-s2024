@@ -5,17 +5,17 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     Rigidbody2D rb;
-    const float moveForce = 25.0f;
+    const float moveForce = 50.0f;
     const float maxSpeed = 10.0f;
+    Vector2 direction = Vector2.zero;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();    
+        rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
-        Vector2 direction = Vector2.zero;
         if (Input.GetKey(KeyCode.W))
         {
             direction += Vector2.up;
@@ -33,7 +33,13 @@ public class Player : MonoBehaviour
             direction += Vector2.right;
         }
         direction = direction.normalized;
+    }
+
+    void FixedUpdate()
+    {
+        // Apply force based on input direction and reset for next input
         rb.AddForce(direction * moveForce);
+        direction = Vector2.zero;
 
         // Limit velocity
         if (rb.velocity.magnitude > maxSpeed)
