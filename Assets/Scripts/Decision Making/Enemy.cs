@@ -9,7 +9,8 @@ public class Enemy : MonoBehaviour
 
     Rigidbody2D rb;
 
-    public Transform[] waypoints;
+    [SerializeField]
+    Transform[] waypoints;
     int waypoint = 0;
 
     const float moveSpeed = 7.5f;
@@ -47,18 +48,26 @@ public class Enemy : MonoBehaviour
         // TODO: Add transition state-based actions (ie acquire nearest waypoint).
 
         // Repeating state-based actions:
+        Color color = Color.white;
         switch (state)
         {
             case State.NEUTRAL:
                 Patrol();
+                color = Color.magenta;
                 break;
 
             case State.OFFENSIVE:
                 Attack();
+                color = Color.red;
+                break;
+
+            case State.DEFENSIVE:
+                Defend();
+                color = Color.blue;
                 break;
         }
 
-        Color color = state == State.NEUTRAL ? Color.green : Color.red;
+        GetComponent<SpriteRenderer>().color = color;
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
     }
 
@@ -86,6 +95,12 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    void Defend()
+    {
+        // TODO -- flee
+        // TODO -- supressing fire
+    }
+
     void Patrol()
     {
         // Seek waypoint
@@ -96,12 +111,17 @@ public class Enemy : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        // You might want to add an EnemyBullet vs PlayerBullet tag, maybe even remove the Bullet tag.
         if (collision.CompareTag("Bullet"))
-            return;
+        {
+            // TODO -- damage enemy if it gets hit with a *Player* bullet
+            // (be careful not to damage the enemy if it collides with its own bullets)
+        }
 
-        // Extra practice: ensure the player will always patrol the nearest waypoint.
-        // Keep track of this when switching into the NEUTRAL state (instead of whenever the player collides)!
-        waypoint++;
-        waypoint %= waypoints.Length;
+        if (collision.CompareTag("Waypoint"))
+        {
+            waypoint++;
+            waypoint %= waypoints.Length;
+        }
     }
 }
