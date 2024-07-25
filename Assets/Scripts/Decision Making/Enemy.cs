@@ -17,6 +17,9 @@ public class Enemy : MonoBehaviour
     const float turnSpeed = 1080.0f;
     const float viewDistance = 5.0f;
 
+    const float maxHealth = 100.0f;
+    float health = maxHealth;
+
     [SerializeField]
     GameObject bulletPrefab;
     Timer shootCooldown = new Timer();
@@ -28,14 +31,16 @@ public class Enemy : MonoBehaviour
         DEFENSIVE
     };
 
-    // TODO: Add health to player & enemy.
-    // If enemy drops below 25% health, flee and shoot!
-    State state = State.NEUTRAL;
+    State statePrev, stateCurr;
+    Color color;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         shootCooldown.total = 0.25f;
+
+        statePrev = stateCurr = State.NEUTRAL;
+        OnTransition(stateCurr);
     }
 
     void Update()
@@ -43,31 +48,46 @@ public class Enemy : MonoBehaviour
         float rotation = Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
         rb.MoveRotation(rotation);
 
-        float playerDistance = Vector2.Distance(transform.position, player.position);
-        state = playerDistance <= viewDistance ? State.OFFENSIVE : State.NEUTRAL;
-        // TODO: Add transition state-based actions (ie acquire nearest waypoint).
+        // Test defensive transition by reducing to 1/4th health!
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            health *= 0.25f;
+        }
 
-        // Repeating state-based actions:
-        Color color = Color.white;
-        switch (state)
+        // State-selection
+        if (stateCurr != State.DEFENSIVE)
+        {
+            // Don't allow state transitions if we're in the defensive state
+            float playerDistance = Vector2.Distance(transform.position, player.position);
+            stateCurr = playerDistance <= viewDistance ? State.OFFENSIVE : State.NEUTRAL;
+
+            // Transition to defensive state if we're below 25% health
+            if (health <= maxHealth * 0.25f)
+                stateCurr = State.DEFENSIVE;
+        }
+
+        // State-specific transition
+        if (stateCurr != statePrev)
+            OnTransition(stateCurr);
+
+        // State-specific update
+        switch (stateCurr)
         {
             case State.NEUTRAL:
                 Patrol();
-                color = Color.magenta;
                 break;
 
             case State.OFFENSIVE:
                 Attack();
-                color = Color.red;
                 break;
 
             case State.DEFENSIVE:
                 Defend();
-                color = Color.blue;
                 break;
         }
 
-        GetComponent<SpriteRenderer>().color = color;
+        // If you're feeling adventurous, change this to apply force within fixed update based on state!
+        statePrev = stateCurr;
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
     }
 
@@ -97,6 +117,7 @@ public class Enemy : MonoBehaviour
 
     void Defend()
     {
+        Debug.Log("Defending...");
         // TODO -- flee
         // TODO -- supressing fire
     }
@@ -123,5 +144,25 @@ public class Enemy : MonoBehaviour
             waypoint++;
             waypoint %= waypoints.Length;
         }
+    }
+
+    void OnTransition(State state)
+    {
+        switch (state)
+        {
+            // TODO -- find nearest waypoint
+            case State.NEUTRAL:
+                color = Color.magenta;
+                break;
+
+            case State.OFFENSIVE:
+                color = Color.red;
+                break;
+
+            case State.DEFENSIVE:
+                color = Color.blue;
+                break;
+        }
+        GetComponent<SpriteRenderer>().color = color;
     }
 }
