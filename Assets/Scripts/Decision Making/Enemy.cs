@@ -2,6 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum WeaponType
+{
+    NONE,
+    SHOTGUN,
+    SNIPER
+}
+
 public class Enemy : MonoBehaviour
 {
     [SerializeField]
@@ -154,8 +161,21 @@ public class Enemy : MonoBehaviour
         if (playerHit && shootCooldown.Expired())
         {
             shootCooldown.Reset();
-            Utilities.CreateBullet(bulletPrefab, transform.position, player.position, 10.0f, 20.0f, UnitType.ENEMY);
+            ShootShotgun();
+            //Utilities.CreateBullet(bulletPrefab, transform.position, player.position, 10.0f, 20.0f, UnitType.ENEMY);
         }
+    }
+
+    void ShootShotgun()
+    {
+        // AB = B - A
+        Vector3 forward = (player.position - transform.position).normalized;
+        Vector3 left = Quaternion.Euler(0.0f, 0.0f, 30.0f) * forward;
+        Vector3 right = Quaternion.Euler(0.0f, 0.0f, -30.0f) * forward;
+
+        Utilities.CreateBullet(bulletPrefab, transform.position, forward, 10.0f, 20.0f, UnitType.ENEMY);
+        Utilities.CreateBullet(bulletPrefab, transform.position, left, 10.0f, 20.0f, UnitType.ENEMY);
+        Utilities.CreateBullet(bulletPrefab, transform.position, right, 10.0f, 20.0f, UnitType.ENEMY);
     }
 
     void OnTransition(State state)

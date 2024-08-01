@@ -42,9 +42,10 @@ public class Player : MonoBehaviour
 
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = 0.0f;
+        Vector3 mouseDirection = (mouse - transform.position).normalized;
 
         if (Input.GetMouseButtonDown(0))
-            Utilities.CreateBullet(bulletPrefab, transform.position, mouse, 15.0f, 25.0f, UnitType.PLAYER);
+            Utilities.CreateBullet(bulletPrefab, transform.position, mouseDirection, 15.0f, 25.0f, UnitType.PLAYER);
 
         // Respawn player if health is below zero
         if (health.health <= 0.0f)

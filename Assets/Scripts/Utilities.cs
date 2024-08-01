@@ -21,15 +21,12 @@ public static class Utilities
         return nearest;
     }
 
-    public static GameObject CreateBullet(GameObject prefab, Vector3 shooter, Vector3 target,
+    public static GameObject CreateBullet(GameObject prefab, Vector3 position, Vector3 direction,
         float speed, float damage, UnitType type, float duration = 1.0f)
     {
-        // AB = B - A
-        Vector3 toTarget = (target - shooter).normalized;
-
         GameObject bullet = Object.Instantiate(prefab);
-        bullet.transform.position = shooter + toTarget;
-        bullet.GetComponent<Rigidbody2D>().velocity = toTarget * speed;
+        bullet.transform.position = position + direction;
+        bullet.GetComponent<Rigidbody2D>().velocity = direction * speed;
 
         Bullet bulletData = bullet.GetComponent<Bullet>();
         bulletData.damage = damage;
