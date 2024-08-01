@@ -39,15 +39,17 @@ public class Enemy : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
-
-        statePrev = stateCurr = State.NEUTRAL;
-        OnTransition(stateCurr);
+        Respawn();
     }
 
     void Update()
     {
         float rotation = Steering.RotateTowardsVelocity(rb, turnSpeed, Time.deltaTime);
         rb.MoveRotation(rotation);
+
+        // Respawn enemy if health is below zero
+        if (health.health <= 0.0f)
+            Respawn();
 
         // Test defensive transition by reducing to 1/4th health!
         if (Input.GetKeyDown(KeyCode.T))
@@ -152,14 +154,7 @@ public class Enemy : MonoBehaviour
         if (playerHit && shootCooldown.Expired())
         {
             shootCooldown.Reset();
-            GameObject bullet = Instantiate(bulletPrefab);
-            bullet.transform.position = transform.position + playerDirection;
-            bullet.GetComponent<Rigidbody2D>().velocity = playerDirection * 10.0f;
-
-            Bullet bulletData = bullet.GetComponent<Bullet>();
-            bulletData.damage = 20.0f;
-            bulletData.type = UnitType.ENEMY;
-            Destroy(bullet, 1.0f);
+            Utilities.CreateBullet(bulletPrefab, transform.position, player.position, 10.0f, 20.0f, UnitType.ENEMY);
         }
     }
 
@@ -183,5 +178,13 @@ public class Enemy : MonoBehaviour
                 break;
         }
         GetComponent<SpriteRenderer>().color = color;
+    }
+
+    void Respawn()
+    {
+        statePrev = stateCurr = State.NEUTRAL;
+        OnTransition(stateCurr);
+        health.health = Health.maxHealth;
+        transform.position = new Vector3(0.0f, 3.0f);
     }
 }

@@ -23,12 +23,13 @@ public class Bullet : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Waypoint")) return;
-        Destroy(gameObject);
 
         if ((collision.CompareTag("Enemy") && type == UnitType.PLAYER) ||
             (collision.CompareTag("Player") && type == UnitType.ENEMY))
         {
             collision.GetComponent<Health>().Damage(damage);
         }
+
+        Destroy(gameObject);
     }
 }

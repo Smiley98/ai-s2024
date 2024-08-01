@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField]
+    GameObject bulletPrefab;
+
+    Health health;
+
     Rigidbody2D rb;
     const float moveForce = 50.0f;
     const float maxSpeed = 10.0f;
@@ -12,6 +17,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        health = GetComponent<Health>();
     }
 
     void Update()
@@ -33,6 +39,16 @@ public class Player : MonoBehaviour
             direction += Vector2.right;
         }
         direction = direction.normalized;
+
+        Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouse.z = 0.0f;
+
+        if (Input.GetMouseButtonDown(0))
+            Utilities.CreateBullet(bulletPrefab, transform.position, mouse, 15.0f, 25.0f, UnitType.PLAYER);
+
+        // Respawn player if health is below zero
+        if (health.health <= 0.0f)
+            Respawn();
     }
 
     void FixedUpdate()
@@ -44,5 +60,11 @@ public class Player : MonoBehaviour
         // Limit velocity
         if (rb.velocity.magnitude > maxSpeed)
             rb.velocity = rb.velocity.normalized * maxSpeed;
+    }
+
+    void Respawn()
+    {
+        health.health = Health.maxHealth;
+        transform.position = new Vector3(0.0f, -3.0f);
     }
 }
