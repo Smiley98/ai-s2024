@@ -124,6 +124,14 @@ public class Enemy : MonoBehaviour
 
     void Patrol()
     {
+        // Increment waypoint if close enough
+        float distance = Vector2.Distance(transform.position, waypoints[waypoint].transform.position);
+        if (distance <= 2.5f)
+        {
+            waypoint++;
+            waypoint %= waypoints.Length;
+        }
+
         // Seek waypoint
         Vector3 steeringForce = Vector2.zero;
         steeringForce += Steering.Seek(rb, waypoints[waypoint].transform.position, moveSpeed);
@@ -138,20 +146,14 @@ public class Enemy : MonoBehaviour
             // TODO -- damage enemy if it gets hit with a *Player* bullet
             // (be careful not to damage the enemy if it collides with its own bullets)
         }
-
-        if (collision.CompareTag("Waypoint"))
-        {
-            waypoint++;
-            waypoint %= waypoints.Length;
-        }
     }
 
     void OnTransition(State state)
     {
         switch (state)
         {
-            // TODO -- find nearest waypoint
             case State.NEUTRAL:
+                waypoint = Utilities.NearestPosition(transform.position, waypoints);
                 color = Color.magenta;
                 break;
 
