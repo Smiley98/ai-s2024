@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum WeaponType
+public enum WeaponType : int
 {
     NONE,
     SHOTGUN,
@@ -21,6 +21,8 @@ public class Enemy : MonoBehaviour
     Transform[] waypoints;
     int waypoint = 0;
 
+    WeaponType weaponType = 0;
+
     const float moveSpeed = 7.5f;
     const float turnSpeed = 1080.0f;
     const float viewDistance = 5.0f;
@@ -29,8 +31,10 @@ public class Enemy : MonoBehaviour
     GameObject bulletPrefab;
     Timer shootCooldown = new Timer();
 
-    const float cooldownOffensive = 0.05f;
-    const float cooldownDefensive = 0.5f;
+    //const float cooldownOffensive = 0.05f;
+    //const float cooldownOffensive = 0.05f;
+    const float cooldownSniper = 0.75f;
+    const float cooldownShotgun = 0.25f;
 
     enum State
     {
@@ -62,6 +66,15 @@ public class Enemy : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
         {
             health.health *= 0.25f;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            int type = (int)weaponType;
+            type++;
+            type = type % 3;
+            weaponType = (WeaponType)type;
+            // TODO - add weapon-specific cooldowns
         }
 
         // State-selection
@@ -161,8 +174,16 @@ public class Enemy : MonoBehaviour
         if (playerHit && shootCooldown.Expired())
         {
             shootCooldown.Reset();
-            ShootShotgun();
-            //Utilities.CreateBullet(bulletPrefab, transform.position, player.position, 10.0f, 20.0f, UnitType.ENEMY);
+            switch (weaponType)
+            {
+                case WeaponType.SHOTGUN:
+                    ShootShotgun();
+                    break;
+
+                case WeaponType.SNIPER:
+                    ShootSniper();
+                    break;
+            }
         }
     }
 
@@ -178,6 +199,12 @@ public class Enemy : MonoBehaviour
         Utilities.CreateBullet(bulletPrefab, transform.position, right, 10.0f, 20.0f, UnitType.ENEMY);
     }
 
+    void ShootSniper()
+    {
+        Vector3 forward = (player.position - transform.position).normalized;
+        Utilities.CreateBullet(bulletPrefab, transform.position, forward, 20.0f, 50.0f, UnitType.ENEMY);
+    }
+
     void OnTransition(State state)
     {
         switch (state)
@@ -189,12 +216,12 @@ public class Enemy : MonoBehaviour
 
             case State.OFFENSIVE:
                 color = Color.red;
-                shootCooldown.total = cooldownOffensive;
+                //shootCooldown.total = cooldownOffensive;
                 break;
 
             case State.DEFENSIVE:
                 color = Color.blue;
-                shootCooldown.total = cooldownDefensive;
+                //shootCooldown.total = cooldownDefensive;
                 break;
         }
         GetComponent<SpriteRenderer>().color = color;
