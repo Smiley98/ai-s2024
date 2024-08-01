@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     Transform player;
 
+    Health health;
     Rigidbody2D rb;
 
     [SerializeField]
@@ -17,12 +18,12 @@ public class Enemy : MonoBehaviour
     const float turnSpeed = 1080.0f;
     const float viewDistance = 5.0f;
 
-    const float maxHealth = 100.0f;
-    float health = maxHealth;
-
     [SerializeField]
     GameObject bulletPrefab;
     Timer shootCooldown = new Timer();
+
+    const float cooldownOffensive = 0.05f;
+    const float cooldownDefensive = 0.5f;
 
     enum State
     {
@@ -37,7 +38,7 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        shootCooldown.total = 0.25f;
+        health = GetComponent<Health>();
 
         statePrev = stateCurr = State.NEUTRAL;
         OnTransition(stateCurr);
@@ -51,7 +52,7 @@ public class Enemy : MonoBehaviour
         // Test defensive transition by reducing to 1/4th health!
         if (Input.GetKeyDown(KeyCode.T))
         {
-            health *= 0.25f;
+            health.health *= 0.25f;
         }
 
         // State-selection
@@ -62,7 +63,7 @@ public class Enemy : MonoBehaviour
             stateCurr = playerDistance <= viewDistance ? State.OFFENSIVE : State.NEUTRAL;
 
             // Transition to defensive state if we're below 25% health
-            if (health <= maxHealth * 0.25f)
+            if (health.health <= Health.maxHealth * 0.25f)
                 stateCurr = State.DEFENSIVE;
         }
 
@@ -91,6 +92,16 @@ public class Enemy : MonoBehaviour
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
     }
 
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        // You might want to add an EnemyBullet vs PlayerBullet tag, maybe even remove the Bullet tag.
+        if (collision.CompareTag("Bullet"))
+        {
+            // TODO -- damage enemy if it gets hit with a *Player* bullet
+            // (be careful not to damage the enemy if it collides with its own bullets)
+        }
+    }
+
     void Attack()
     {
         // Seek player
@@ -98,28 +109,19 @@ public class Enemy : MonoBehaviour
         steeringForce += Steering.Seek(rb, player.position, moveSpeed);
         rb.AddForce(steeringForce);
 
-        // LOS to player
-        Vector3 playerDirection = (player.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, playerDirection, viewDistance);
-        bool playerHit = hit && hit.collider.CompareTag("Player");
-
-        // Shoot player if in LOS
-        shootCooldown.Tick(Time.deltaTime);
-        if (playerHit && shootCooldown.Expired())
-        {
-            shootCooldown.Reset();
-            GameObject bullet = Instantiate(bulletPrefab);
-            bullet.transform.position = transform.position + playerDirection;
-            bullet.GetComponent<Rigidbody2D>().velocity = playerDirection * 10.0f;
-            Destroy(bullet, 1.0f);
-        }
+        // Shoot player
+        Shoot();
     }
 
     void Defend()
     {
-        Debug.Log("Defending...");
-        // TODO -- flee
-        // TODO -- supressing fire
+        // Flee player
+        Vector3 steeringForce = Vector2.zero;
+        steeringForce += Steering.Flee(rb, player.position, moveSpeed);
+        rb.AddForce(steeringForce);
+
+        // Shoot player
+        Shoot();
     }
 
     void Patrol()
@@ -138,13 +140,26 @@ public class Enemy : MonoBehaviour
         rb.AddForce(steeringForce);
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
+    void Shoot()
     {
-        // You might want to add an EnemyBullet vs PlayerBullet tag, maybe even remove the Bullet tag.
-        if (collision.CompareTag("Bullet"))
+        // LOS to player
+        Vector3 playerDirection = (player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, playerDirection, viewDistance);
+        bool playerHit = hit && hit.collider.CompareTag("Player");
+
+        // Shoot player if in LOS
+        shootCooldown.Tick(Time.deltaTime);
+        if (playerHit && shootCooldown.Expired())
         {
-            // TODO -- damage enemy if it gets hit with a *Player* bullet
-            // (be careful not to damage the enemy if it collides with its own bullets)
+            shootCooldown.Reset();
+            GameObject bullet = Instantiate(bulletPrefab);
+            bullet.transform.position = transform.position + playerDirection;
+            bullet.GetComponent<Rigidbody2D>().velocity = playerDirection * 10.0f;
+
+            Bullet bulletData = bullet.GetComponent<Bullet>();
+            bulletData.damage = 20.0f;
+            bulletData.type = UnitType.ENEMY;
+            Destroy(bullet, 1.0f);
         }
     }
 
@@ -153,16 +168,18 @@ public class Enemy : MonoBehaviour
         switch (state)
         {
             case State.NEUTRAL:
-                waypoint = Utilities.NearestPosition(transform.position, waypoints);
                 color = Color.magenta;
+                waypoint = Utilities.NearestPosition(transform.position, waypoints);
                 break;
 
             case State.OFFENSIVE:
                 color = Color.red;
+                shootCooldown.total = cooldownOffensive;
                 break;
 
             case State.DEFENSIVE:
                 color = Color.blue;
+                shootCooldown.total = cooldownDefensive;
                 break;
         }
         GetComponent<SpriteRenderer>().color = color;
