@@ -30,12 +30,13 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     GameObject bulletPrefab;
     Timer shootCooldown = new Timer();
+    Timer switchCooldown = new Timer();
 
     const float cooldownSniper = 0.75f;
     const float cooldownShotgun = 0.25f;
 
-    public bool hasShotgun = false;
-    public bool hasSniper = false;
+    bool hasShotgun = false;
+    bool hasSniper = false;
 
     enum State
     {
@@ -52,6 +53,7 @@ public class Enemy : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
         Respawn();
+        switchCooldown.total = 2.5f;
     }
 
     void Update()
@@ -115,16 +117,6 @@ public class Enemy : MonoBehaviour
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
-    {
-        // You might want to add an EnemyBullet vs PlayerBullet tag, maybe even remove the Bullet tag.
-        if (collision.CompareTag("Bullet"))
-        {
-            // TODO -- damage enemy if it gets hit with a *Player* bullet
-            // (be careful not to damage the enemy if it collides with its own bullets)
-        }
-    }
-
     void Attack()
     {
         // Seek player
@@ -165,13 +157,15 @@ public class Enemy : MonoBehaviour
 
     void Shoot()
     {
+        float dt = Time.deltaTime;
+
         // LOS to player
         Vector3 playerDirection = (player.position - transform.position).normalized;
         RaycastHit2D hit = Physics2D.Raycast(transform.position, playerDirection, viewDistance);
         bool playerHit = hit && hit.collider.CompareTag("Player");
 
         // Shoot player if in LOS
-        shootCooldown.Tick(Time.deltaTime);
+        shootCooldown.Tick(dt);
         if (playerHit && shootCooldown.Expired())
         {
             shootCooldown.Reset();
@@ -184,6 +178,23 @@ public class Enemy : MonoBehaviour
                 case WeaponType.SNIPER:
                     ShootSniper();
                     break;
+            }
+        }
+
+        if (Armed())
+        {
+            switchCooldown.Tick(dt);
+            if (switchCooldown.Expired())
+            {
+                switchCooldown.Reset();
+                if (weaponType == WeaponType.SHOTGUN)
+                {
+                    weaponType = WeaponType.SNIPER;
+                }
+                else if (weaponType == WeaponType.SNIPER)
+                {
+                    weaponType = WeaponType.SHOTGUN;
+                }
             }
         }
     }
@@ -252,5 +263,29 @@ public class Enemy : MonoBehaviour
                 shootCooldown.total = cooldownSniper;
                 break;
         }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!Armed())
+        {
+            if (collision.CompareTag("Shotgun"))
+            {
+                hasShotgun = true;
+                weaponType = WeaponType.SHOTGUN;
+                OnWeaponPickup(weaponType);
+            }
+            if (collision.CompareTag("Sniper"))
+            {
+                hasSniper = true;
+                weaponType = WeaponType.SNIPER;
+                OnWeaponPickup(weaponType);
+            }
+        }
+    }
+
+    public bool Armed()
+    {
+        return hasShotgun && hasSniper;
     }
 }

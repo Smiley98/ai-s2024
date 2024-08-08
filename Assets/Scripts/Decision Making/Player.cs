@@ -14,8 +14,8 @@ public class Player : MonoBehaviour
     const float maxSpeed = 10.0f;
     Vector2 direction = Vector2.zero;
 
-    public bool hasShotgun = false;
-    public bool hasSniper = false;
+    bool hasShotgun = false;
+    bool hasSniper = false;
 
     void Start()
     {
@@ -70,5 +70,10 @@ public class Player : MonoBehaviour
     {
         health.health = Health.maxHealth;
         transform.position = new Vector3(0.0f, -3.0f);
+    }
+
+    public bool Armed()
+    {
+        return hasShotgun && hasSniper;
     }
 }

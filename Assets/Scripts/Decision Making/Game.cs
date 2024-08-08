@@ -23,7 +23,8 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        weaponSpawner.total = 0.05f;
+        // Consider decreasing this for testing!
+        weaponSpawner.total = 2.5f;
         float size = Camera.main.orthographicSize;
         float aspect = Camera.main.aspect;
         xMin = -size * aspect; xMax = size * aspect;
@@ -35,9 +36,10 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        bool canSpawn = !(
-            enemy.hasShotgun && enemy.hasSniper &&
-            player.hasShotgun && player.hasSniper);
+        bool canSpawn = !(player.Armed() && enemy.Armed());
+        // Could improve by spawning the required weapon:
+        //enemy.hasShotgun && enemy.hasSniper &&
+        //player.hasShotgun && player.hasSniper);
 
         if (canSpawn)
         {
