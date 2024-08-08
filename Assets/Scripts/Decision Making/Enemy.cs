@@ -31,8 +31,6 @@ public class Enemy : MonoBehaviour
     GameObject bulletPrefab;
     Timer shootCooldown = new Timer();
 
-    //const float cooldownOffensive = 0.05f;
-    //const float cooldownOffensive = 0.05f;
     const float cooldownSniper = 0.75f;
     const float cooldownShotgun = 0.25f;
 
@@ -74,7 +72,7 @@ public class Enemy : MonoBehaviour
             type++;
             type = type % 3;
             weaponType = (WeaponType)type;
-            // TODO - add weapon-specific cooldowns
+            OnWeaponPickup(weaponType);
         }
 
         // State-selection
@@ -194,9 +192,13 @@ public class Enemy : MonoBehaviour
         Vector3 left = Quaternion.Euler(0.0f, 0.0f, 30.0f) * forward;
         Vector3 right = Quaternion.Euler(0.0f, 0.0f, -30.0f) * forward;
 
-        Utilities.CreateBullet(bulletPrefab, transform.position, forward, 10.0f, 20.0f, UnitType.ENEMY);
-        Utilities.CreateBullet(bulletPrefab, transform.position, left, 10.0f, 20.0f, UnitType.ENEMY);
-        Utilities.CreateBullet(bulletPrefab, transform.position, right, 10.0f, 20.0f, UnitType.ENEMY);
+        float duration = 5.0f;
+        // If we wanted to remove the need to modify the same 3 values for each bullet,
+        // we could automate shotgun bullet creation with a lambda function:
+        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions
+        Utilities.CreateBullet(bulletPrefab, transform.position, forward, 10.0f, 20.0f, UnitType.ENEMY, duration);
+        Utilities.CreateBullet(bulletPrefab, transform.position, left, 10.0f, 20.0f, UnitType.ENEMY, duration);
+        Utilities.CreateBullet(bulletPrefab, transform.position, right, 10.0f, 20.0f, UnitType.ENEMY, duration);
     }
 
     void ShootSniper()
@@ -233,5 +235,19 @@ public class Enemy : MonoBehaviour
         OnTransition(stateCurr);
         health.health = Health.maxHealth;
         transform.position = new Vector3(0.0f, 3.0f);
+    }
+    
+    void OnWeaponPickup(WeaponType type)
+    {
+        switch (type)
+        {
+            case WeaponType.SHOTGUN:
+                shootCooldown.total = cooldownShotgun;
+                break;
+
+            case WeaponType.SNIPER:
+                shootCooldown.total = cooldownSniper;
+                break;
+        }
     }
 }

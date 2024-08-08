@@ -30,6 +30,7 @@ public class Bullet : MonoBehaviour
             collision.GetComponent<Health>().Damage(damage);
         }
 
-        Destroy(gameObject);
+        if (!collision.CompareTag("Bullet"))
+            Destroy(gameObject);
     }
 }
