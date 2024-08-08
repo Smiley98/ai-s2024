@@ -71,6 +71,7 @@ public class Enemy : MonoBehaviour
             health.health *= 0.25f;
         }
 
+        // Test weapon switching, consider removing this before submitting
         if (Input.GetKeyDown(KeyCode.Y))
         {
             int type = (int)weaponType;
@@ -112,7 +113,6 @@ public class Enemy : MonoBehaviour
                 break;
         }
 
-        // If you're feeling adventurous, change this to apply force within fixed update based on state!
         statePrev = stateCurr;
         Debug.DrawLine(transform.position, transform.position + transform.right * viewDistance, color);
     }
@@ -124,8 +124,38 @@ public class Enemy : MonoBehaviour
         steeringForce += Steering.Seek(rb, player.position, moveSpeed);
         rb.AddForce(steeringForce);
 
-        // Shoot player
-        Shoot();
+        // LOS to player
+        Vector3 playerDirection = (player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, playerDirection, viewDistance);
+        bool playerHit = hit && hit.collider.CompareTag("Player");
+
+        // Shoot player if in LOS
+        if (playerHit)
+        {
+            Shoot();
+        }
+        else
+        {
+            // TODO -- seek visibility if no line-of-sight
+        }
+
+        // Switch weapon
+        if (Armed())
+        {
+            switchCooldown.Tick(Time.deltaTime);
+            if (switchCooldown.Expired())
+            {
+                switchCooldown.Reset();
+                if (weaponType == WeaponType.SHOTGUN)
+                {
+                    weaponType = WeaponType.SNIPER;
+                }
+                else if (weaponType == WeaponType.SNIPER)
+                {
+                    weaponType = WeaponType.SHOTGUN;
+                }
+            }
+        }
     }
 
     void Defend()
@@ -137,6 +167,27 @@ public class Enemy : MonoBehaviour
 
         // Shoot player
         Shoot();
+
+        // TODO -- seek cover
+    }
+
+    void Shoot()
+    {
+        shootCooldown.Tick(Time.deltaTime);
+        if (shootCooldown.Expired())
+        {
+            shootCooldown.Reset();
+            switch (weaponType)
+            {
+                case WeaponType.SHOTGUN:
+                    ShootShotgun();
+                    break;
+
+                case WeaponType.SNIPER:
+                    ShootSniper();
+                    break;
+            }
+        }
     }
 
     void Patrol()
@@ -155,50 +206,6 @@ public class Enemy : MonoBehaviour
         rb.AddForce(steeringForce);
     }
 
-    void Shoot()
-    {
-        float dt = Time.deltaTime;
-
-        // LOS to player
-        Vector3 playerDirection = (player.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, playerDirection, viewDistance);
-        bool playerHit = hit && hit.collider.CompareTag("Player");
-
-        // Shoot player if in LOS
-        shootCooldown.Tick(dt);
-        if (playerHit && shootCooldown.Expired())
-        {
-            shootCooldown.Reset();
-            switch (weaponType)
-            {
-                case WeaponType.SHOTGUN:
-                    ShootShotgun();
-                    break;
-
-                case WeaponType.SNIPER:
-                    ShootSniper();
-                    break;
-            }
-        }
-
-        if (Armed())
-        {
-            switchCooldown.Tick(dt);
-            if (switchCooldown.Expired())
-            {
-                switchCooldown.Reset();
-                if (weaponType == WeaponType.SHOTGUN)
-                {
-                    weaponType = WeaponType.SNIPER;
-                }
-                else if (weaponType == WeaponType.SNIPER)
-                {
-                    weaponType = WeaponType.SHOTGUN;
-                }
-            }
-        }
-    }
-
     void ShootShotgun()
     {
         // AB = B - A
@@ -206,13 +213,12 @@ public class Enemy : MonoBehaviour
         Vector3 left = Quaternion.Euler(0.0f, 0.0f, 30.0f) * forward;
         Vector3 right = Quaternion.Euler(0.0f, 0.0f, -30.0f) * forward;
 
-        float duration = 5.0f;
-        // If we wanted to remove the need to modify the same 3 values for each bullet,
-        // we could automate shotgun bullet creation with a lambda function:
-        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions
-        Utilities.CreateBullet(bulletPrefab, transform.position, forward, 10.0f, 20.0f, UnitType.ENEMY, duration);
-        Utilities.CreateBullet(bulletPrefab, transform.position, left, 10.0f, 20.0f, UnitType.ENEMY, duration);
-        Utilities.CreateBullet(bulletPrefab, transform.position, right, 10.0f, 20.0f, UnitType.ENEMY, duration);
+        float speed = 10.0f;
+        float damage = 20.0f;
+        float duration = 1.0f;
+        Utilities.CreateBullet(bulletPrefab, transform.position, forward, speed, damage, UnitType.ENEMY, duration);
+        Utilities.CreateBullet(bulletPrefab, transform.position, left, speed, damage, UnitType.ENEMY, duration);
+        Utilities.CreateBullet(bulletPrefab, transform.position, right, speed, damage, UnitType.ENEMY, duration);
     }
 
     void ShootSniper()

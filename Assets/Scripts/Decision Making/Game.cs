@@ -36,6 +36,7 @@ public class Game : MonoBehaviour
 
     void Update()
     {
+        // TODO -- destroy all weapon pickups once player and enemy are armed!
         bool canSpawn = !(player.Armed() && enemy.Armed());
         // Could improve by spawning the required weapon:
         //enemy.hasShotgun && enemy.hasSniper &&
