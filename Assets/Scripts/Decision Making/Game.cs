@@ -18,9 +18,15 @@ public class Game : MonoBehaviour
 
     Timer weaponSpawner = new Timer();
 
+    float xMin, xMax, yMin, yMax;
+
     void Start()
     {
         weaponSpawner.total = 1.0f;
+        float size = Camera.main.orthographicSize;
+        float aspect = Camera.main.aspect;
+        xMin = -size * aspect; xMax = size * aspect;
+        yMin = -size; yMax = size;
     }
 
     void Update()
@@ -34,6 +40,8 @@ public class Game : MonoBehaviour
             weaponSpawner.Tick(Time.deltaTime);
             if (weaponSpawner.Expired())
             {
+                weaponSpawner.Reset();
+
                 int value = Random.Range(1, 3);
                 if (value == (int)WeaponType.SHOTGUN)
                 {
@@ -44,6 +52,10 @@ public class Game : MonoBehaviour
                     Debug.Log("Spawning Sniper");
                 }
 
+                Vector3 position = WeaponSpawnPosition();
+                GameObject weapon = Instantiate(shotgunPrefab);
+                weapon.transform.position = position;
+
                 // Spawner test:
                 //else
                 //{
@@ -52,5 +64,12 @@ public class Game : MonoBehaviour
                 //Debug.Log(value);
             }
         }
+    }
+
+    Vector3 WeaponSpawnPosition()
+    {
+        float x = Random.Range(xMin, xMax);
+        float y = Random.Range(yMin, yMax);
+        return new Vector3(x, y);
     }
 }
