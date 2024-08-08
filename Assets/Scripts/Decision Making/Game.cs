@@ -19,14 +19,18 @@ public class Game : MonoBehaviour
     Timer weaponSpawner = new Timer();
 
     float xMin, xMax, yMin, yMax;
+    float shotgunRadius, sniperRadius;
 
     void Start()
     {
-        weaponSpawner.total = 1.0f;
+        weaponSpawner.total = 0.05f;
         float size = Camera.main.orthographicSize;
         float aspect = Camera.main.aspect;
         xMin = -size * aspect; xMax = size * aspect;
         yMin = -size; yMax = size;
+
+        shotgunRadius = shotgunPrefab.GetComponent<CircleCollider2D>().radius;
+        sniperRadius = sniperPrefab.GetComponent<CircleCollider2D>().radius;
     }
 
     void Update()
@@ -42,18 +46,24 @@ public class Game : MonoBehaviour
             {
                 weaponSpawner.Reset();
 
-                int value = Random.Range(1, 3);
-                if (value == (int)WeaponType.SHOTGUN)
+                WeaponType type = (WeaponType)Random.Range(1, 3);
+                GameObject weaponPrefab = null;
+                float radius = 0.0f;
+
+                switch (type)
                 {
-                    Debug.Log("Spawning Shotgun");
-                }
-                else if (value == (int)WeaponType.SNIPER)
-                {
-                    Debug.Log("Spawning Sniper");
+                    case WeaponType.SHOTGUN:
+                        weaponPrefab = shotgunPrefab;
+                        radius = shotgunRadius;
+                        break;
+                    case WeaponType.SNIPER:
+                        weaponPrefab = sniperPrefab;
+                        radius = sniperRadius;
+                        break;
                 }
 
-                Vector3 position = WeaponSpawnPosition();
-                GameObject weapon = Instantiate(shotgunPrefab);
+                Vector2 position = WeaponSpawnPosition(radius);
+                GameObject weapon = Instantiate(weaponPrefab);
                 weapon.transform.position = position;
 
                 // Spawner test:
@@ -66,10 +76,19 @@ public class Game : MonoBehaviour
         }
     }
 
-    Vector3 WeaponSpawnPosition()
+    Vector2 WeaponSpawnPosition(float radius)
     {
-        float x = Random.Range(xMin, xMax);
-        float y = Random.Range(yMin, yMax);
-        return new Vector3(x, y);
+        float x = 0.0f;
+        float y = 0.0f;
+
+        for (int i = 0; i < 128; i++)
+        {
+            x = Random.Range(xMin, xMax);
+            y = Random.Range(yMin, yMax);
+            if (!Physics2D.OverlapCircle(new Vector2(x, y), radius))
+                break;
+        }
+
+        return new Vector2(x, y);
     }
 }
