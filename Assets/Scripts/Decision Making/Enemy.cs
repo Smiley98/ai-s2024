@@ -34,6 +34,9 @@ public class Enemy : MonoBehaviour
     const float cooldownSniper = 0.75f;
     const float cooldownShotgun = 0.25f;
 
+    public bool hasShotgun = false;
+    public bool hasSniper = false;
+
     enum State
     {
         NEUTRAL,

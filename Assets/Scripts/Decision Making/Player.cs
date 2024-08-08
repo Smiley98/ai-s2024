@@ -14,6 +14,9 @@ public class Player : MonoBehaviour
     const float maxSpeed = 10.0f;
     Vector2 direction = Vector2.zero;
 
+    public bool hasShotgun = false;
+    public bool hasSniper = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();

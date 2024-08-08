@@ -7,6 +7,8 @@ TagManager:
   - Bullet
   - Waypoint
   - Enemy
+  - Shotgun
+  - Sniper
   layers:
   - Default
   - TransparentFX
